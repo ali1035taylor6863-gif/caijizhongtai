@@ -1,0 +1,6 @@
+{
+  "name": "网站独立部署服务 - 境内持久采集",
+  "description": "境内持久采集系统 · 维护各重点资讯站点与多深度爬取任务的独立节点服务配置、代理通道矩阵与健康度管控",
+  "prompt": "网站独立部署服务 - 境内持久采集",
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
