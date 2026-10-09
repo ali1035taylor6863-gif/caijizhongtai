@@ -25788,6 +25788,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
             id: `${svc.id}-S${idx + 1}`,
             freq: f,
             freqText: p.freqText || `${f}m/轮`,
+            concurrency: p.concurrency || (f <= 3 ? 16 : f <= 5 ? 12 : f <= 10 ? 8 : f <= 15 ? 6 : 4),
             kwCount: count,
             dotClass: f <= 3 ? 'bg-rose-500' : f <= 5 ? 'bg-orange-500' : f <= 10 ? 'bg-blue-500' : f <= 15 ? 'bg-emerald-500' : 'bg-slate-400',
             status: '调度正常'
@@ -25801,6 +25802,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
               id: `${svc.id}-S${freqMap.size + 1}`,
               freq: f,
               freqText: `${f}m/轮`,
+              concurrency: f <= 3 ? 16 : f <= 5 ? 12 : f <= 10 ? 8 : f <= 15 ? 6 : 4,
               kwCount: 1,
               dotClass: f <= 5 ? 'bg-rose-500' : f <= 10 ? 'bg-blue-500' : 'bg-amber-500',
               status: '调度正常'
@@ -26214,7 +26216,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                                               }),
                                               isOpen &&
                                                 (0, $.jsx)(`div`, {
-                                                  className: `absolute left-0 top-full mt-1.5 z-50 bg-white border border-slate-200 rounded-xl shadow-xl p-3.5 w-[410px] text-left animate-in fade-in zoom-in-95 duration-150`,
+                                                  className: `absolute left-0 top-full mt-1.5 z-50 bg-white border border-slate-200 rounded-xl shadow-xl p-3.5 w-[475px] text-left animate-in fade-in zoom-in-95 duration-150`,
                                                   onClick: (t) => t.stopPropagation(),
                                                   children: (0, $.jsxs)(`table`, {
                                                     className: `w-full border-collapse text-left`,
@@ -26226,6 +26228,10 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                                                             (0, $.jsx)(`th`, {
                                                               className: `pb-2 font-bold whitespace-nowrap`,
                                                               children: `采集频率`,
+                                                            }),
+                                                            (0, $.jsx)(`th`, {
+                                                              className: `pb-2 text-center font-bold whitespace-nowrap`,
+                                                              children: `并发线程数`,
                                                             }),
                                                             (0, $.jsx)(`th`, {
                                                               className: `pb-2 text-center font-bold whitespace-nowrap`,
@@ -26262,6 +26268,13 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                                                                         children: sub.freqText,
                                                                       }),
                                                                     ],
+                                                                  }),
+                                                                }),
+                                                                (0, $.jsx)(`td`, {
+                                                                  className: `py-2 text-center whitespace-nowrap`,
+                                                                  children: (0, $.jsxs)(`span`, {
+                                                                    className: `inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60`,
+                                                                    children: [sub.concurrency || (sub.freq <= 3 ? 16 : sub.freq <= 5 ? 12 : sub.freq <= 10 ? 8 : sub.freq <= 15 ? 6 : 4), ` 线程`],
                                                                   }),
                                                                 }),
                                                                 (0, $.jsx)(`td`, {
@@ -46089,36 +46102,42 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         return Array.isArray(ips) ? ips.join(`, `) : String(ips);
       }),
       [ft, pt] = (0, C.useState)(() => {
-        if (r?.frequencies && Array.isArray(r.frequencies) && r.frequencies.length > 0) return r.frequencies;
+        if (r?.frequencies && Array.isArray(r.frequencies) && r.frequencies.length > 0) {
+          return r.frequencies.map((item) => ({
+            ...item,
+            concurrency: item.concurrency || (item.freq <= 3 ? 16 : item.freq <= 5 ? 12 : item.freq <= 10 ? 8 : item.freq <= 15 ? 6 : 4),
+          }));
+        }
         let pName = n.platformName || n.name || ``;
         if (pName.includes(`知乎`) || pName.includes(`哔哩哔哩`)) {
           return [
-            { freq: 5, freqText: `5m/轮`, name: `高频热榜巡检`, kwCount: 2, todayHits: 14500, status: `normal` },
-            { freq: 10, freqText: `10m/轮`, name: `核心问答监控`, kwCount: 3, todayHits: 8200, status: `normal` },
-            { freq: 15, freqText: `15m/轮`, name: `常态舆情轮询`, kwCount: 2, todayHits: 4100, status: `normal` },
-            { freq: 20, freqText: `20m/轮`, name: `长尾深度索引`, kwCount: 1, todayHits: 1800, status: `normal` },
-            { freq: 30, freqText: `30m/轮`, name: `低频兜底复查`, kwCount: 1, todayHits: 900, status: `normal` },
+            { freq: 5, freqText: `5m/轮`, concurrency: 12, name: `高频热榜巡检`, kwCount: 2, todayHits: 14500, status: `normal` },
+            { freq: 10, freqText: `10m/轮`, concurrency: 8, name: `核心问答监控`, kwCount: 3, todayHits: 8200, status: `normal` },
+            { freq: 15, freqText: `15m/轮`, concurrency: 6, name: `常态舆情轮询`, kwCount: 2, todayHits: 4100, status: `normal` },
+            { freq: 20, freqText: `20m/轮`, concurrency: 4, name: `长尾深度索引`, kwCount: 1, todayHits: 1800, status: `normal` },
+            { freq: 30, freqText: `30m/轮`, concurrency: 4, name: `低频兜底复查`, kwCount: 1, todayHits: 900, status: `normal` },
           ];
         }
         if (pName.includes(`爱奇艺`) || pName.includes(`好看`) || pName.includes(`搜狐`) || pName.includes(`优酷`)) {
           return [
-            { freq: 5, freqText: `5m/轮`, name: `热剧短片巡查`, kwCount: 1, todayHits: 9800, status: `normal` },
-            { freq: 10, freqText: `10m/轮`, name: `核心频道索引`, kwCount: 2, todayHits: 5600, status: `normal` },
-            { freq: 15, freqText: `15m/轮`, name: `常态增量采集`, kwCount: 2, todayHits: 3200, status: `normal` },
-            { freq: 20, freqText: `20m/轮`, name: `影视片单轮询`, kwCount: 1, todayHits: 1400, status: `normal` },
-            { freq: 30, freqText: `30m/轮`, name: `低频兜底复查`, kwCount: 1, todayHits: 700, status: `normal` },
+            { freq: 5, freqText: `5m/轮`, concurrency: 12, name: `热剧短片巡查`, kwCount: 1, todayHits: 9800, status: `normal` },
+            { freq: 10, freqText: `10m/轮`, concurrency: 8, name: `核心频道索引`, kwCount: 2, todayHits: 5600, status: `normal` },
+            { freq: 15, freqText: `15m/轮`, concurrency: 6, name: `常态增量采集`, kwCount: 2, todayHits: 3200, status: `normal` },
+            { freq: 20, freqText: `20m/轮`, concurrency: 4, name: `影视片单轮询`, kwCount: 1, todayHits: 1400, status: `normal` },
+            { freq: 30, freqText: `30m/轮`, concurrency: 4, name: `低频兜底复查`, kwCount: 1, todayHits: 700, status: `normal` },
           ];
         }
         return [
-          { freq: 3, freqText: `3m/轮`, name: `实时热搜爆款`, kwCount: 2, todayHits: 28400, status: `normal` },
-          { freq: 5, freqText: `5m/轮`, name: `高频舆情突发`, kwCount: 3, todayHits: 19800, status: `normal` },
-          { freq: 10, freqText: `10m/轮`, name: `核心关键词巡检`, kwCount: 4, todayHits: 11200, status: `normal` },
-          { freq: 15, freqText: `15m/轮`, name: `常态增量轮询`, kwCount: 3, todayHits: 6400, status: `normal` },
-          { freq: 30, freqText: `30m/轮`, name: `低频兜底观察`, kwCount: 2, todayHits: 2100, status: `normal` },
+          { freq: 3, freqText: `3m/轮`, concurrency: 16, name: `实时热搜爆款`, kwCount: 2, todayHits: 28400, status: `normal` },
+          { freq: 5, freqText: `5m/轮`, concurrency: 12, name: `高频舆情突发`, kwCount: 3, todayHits: 19800, status: `normal` },
+          { freq: 10, freqText: `10m/轮`, concurrency: 8, name: `核心关键词巡检`, kwCount: 4, todayHits: 11200, status: `normal` },
+          { freq: 15, freqText: `15m/轮`, concurrency: 6, name: `常态增量轮询`, kwCount: 3, todayHits: 6400, status: `normal` },
+          { freq: 30, freqText: `30m/轮`, concurrency: 4, name: `低频兜底观察`, kwCount: 2, todayHits: 2100, status: `normal` },
         ];
       }),
       [showAddFreq, setShowAddFreq] = (0, C.useState)(!1),
       [newFreqMinutes, setNewFreqMinutes] = (0, C.useState)(5),
+      [newFreqConcurrency, setNewFreqConcurrency] = (0, C.useState)(8),
       [newFreqName, setNewFreqName] = (0, C.useState)(``);
 
     (0, C.useEffect)(() => {
@@ -46149,6 +46168,17 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
       pt((prev) => prev.filter((item) => item.freq !== freqVal));
     };
 
+    let handleUpdateFreqConcurrency = (freqVal, newConc) => {
+      let val = Math.max(1, Math.min(64, Number(newConc) || 1));
+      pt((prev) =>
+        prev.map((item) =>
+          item.freq === freqVal
+            ? { ...item, concurrency: val }
+            : item,
+        ),
+      );
+    };
+
     let handleAddFrequency = () => {
       let m = Number(newFreqMinutes);
       if (!m || m <= 0) return;
@@ -46156,9 +46186,11 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         if (l) l(`该频率（${m}m/轮）已存在，无需重复添加！`, `error`);
         return;
       }
+      let cVal = Number(newFreqConcurrency) || (m <= 3 ? 16 : m <= 5 ? 12 : m <= 10 ? 8 : m <= 15 ? 6 : 4);
       let newEntry = {
         freq: m,
         freqText: `${m}m/轮`,
+        concurrency: cVal,
         name: newFreqName.trim() || `${m}分钟定时轮询`,
         kwCount: 1,
         todayHits: 0,
@@ -46167,7 +46199,8 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
       pt((prev) => [...prev, newEntry].sort((a, b) => a.freq - b.freq));
       setShowAddFreq(!1);
       setNewFreqName(``);
-      if (l) l(`已成功为当前节点添加【${m}m/轮】采集频率！`, `success`);
+      setNewFreqConcurrency(8);
+      if (l) l(`已成功为当前节点添加【${m}m/轮】采集频率（${cVal}并发线程）！`, `success`);
     };
 
     let handleSaveAll = () => {
@@ -46182,7 +46215,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         domain: domain,
         vendor: proxyVendor,
         proxyKey: proxyChannel,
-        concurrency: Number(workerConcurrency),
+        concurrency: ft.length > 0 ? (ft[0].concurrency || 8) : 8,
         logTimeout: Number(logTimeoutMinutes),
         nodeServer: nodeServer,
         nodeIps: ipsArray.length > 0 ? ipsArray : [`10.12.8.21`, `10.14.3.56`],
@@ -46295,9 +46328,9 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                 ],
               }),
 
-              /* 2. 代理网络通道与并发频控 (参考 ID自增长 · 服务列表 采集配置) */
+              /* 2. 代理网络通道与日志超时 (并发线程数移至各采集频率独立设置) */
               (0, $.jsxs)(`div`, {
-                className: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`,
+                className: `grid grid-cols-1 sm:grid-cols-3 gap-4`,
                 children: [
                   (0, $.jsxs)(`div`, {
                     className: `flex flex-col gap-1.5`,
@@ -46336,32 +46369,6 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                           (0, $.jsx)(`option`, { value: `BGP静态IP隧道`, children: `BGP静态IP隧道` }),
                           (0, $.jsx)(`option`, { value: `移动基站4G/5G出口`, children: `移动基站4G/5G出口` }),
                         ],
-                      }),
-                    ],
-                  }),
-                  (0, $.jsxs)(`div`, {
-                    className: `flex flex-col gap-1.5`,
-                    children: [
-                      (0, $.jsxs)(`div`, {
-                        className: `flex items-center justify-between`,
-                        children: [
-                          (0, $.jsx)(`label`, {
-                            className: `text-[12.5px] font-semibold text-slate-700`,
-                            children: `Worker 并发线程数`,
-                          }),
-                          (0, $.jsx)(`span`, {
-                            className: `text-[11px] text-slate-400`,
-                            children: `建议 4~16`,
-                          }),
-                        ],
-                      }),
-                      (0, $.jsx)(`input`, {
-                        type: `number`,
-                        min: 1,
-                        max: 32,
-                        value: workerConcurrency,
-                        onChange: (e) => setWorkerConcurrency(Number(e.target.value)),
-                        className: `h-9.5 px-3 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 bg-white focus:border-[#0066FF] focus:ring-2 focus:ring-[#0066FF]/12 transition-all outline-none`,
                       }),
                     ],
                   }),
@@ -46493,7 +46500,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                         children: [
                           (0, $.jsx)(`span`, {
                             className: `text-[11px] text-slate-400 hidden sm:inline`,
-                            children: `对应主列表【采集频率】展开面板展示数据`,
+                            children: `对应主列表【采集频率】展开展示 · 各采集频率分别设置并发线程数`,
                           }),
                           (0, $.jsxs)(`button`, {
                             type: `button`,
@@ -46528,6 +46535,23 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                               value: newFreqMinutes,
                               onChange: (e) => setNewFreqMinutes(Number(e.target.value)),
                               className: `w-18 h-7.5 px-2 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 bg-white outline-none`,
+                            }),
+                          ],
+                        }),
+                        (0, $.jsxs)(`div`, {
+                          className: `flex items-center gap-1.5`,
+                          children: [
+                            (0, $.jsx)(`span`, {
+                              className: `text-[11px] font-bold text-slate-700`,
+                              children: `并发线程:`,
+                            }),
+                            (0, $.jsx)(`input`, {
+                              type: `number`,
+                              min: 1,
+                              max: 64,
+                              value: newFreqConcurrency,
+                              onChange: (e) => setNewFreqConcurrency(Number(e.target.value)),
+                              className: `w-16 h-7.5 px-2 border border-slate-300 rounded-lg text-xs font-mono font-bold text-blue-700 bg-white outline-none`,
                             }),
                           ],
                         }),
@@ -46568,6 +46592,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                             children: [
                               (0, $.jsx)(`th`, { className: `py-2.5 px-4 font-bold text-slate-700`, children: `采集频率` }),
                               (0, $.jsx)(`th`, { className: `py-2.5 px-3 font-bold text-slate-700`, children: `策略别名` }),
+                              (0, $.jsx)(`th`, { className: `py-2.5 px-3 font-bold text-slate-700 text-center`, children: `并发线程数` }),
                               (0, $.jsx)(`th`, { className: `py-2.5 px-3 font-bold text-slate-700 text-center`, children: `关键词数量` }),
                               (0, $.jsx)(`th`, { className: `py-2.5 px-3 font-bold text-slate-700 text-right`, children: `今日社媒命中入库` }),
                               (0, $.jsx)(`th`, { className: `py-2.5 px-3 font-bold text-slate-700 text-center`, children: `调度状态` }),
@@ -46579,6 +46604,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                           className: `divide-y divide-slate-100 font-sans`,
                           children: ft.map((item) => {
                             let isPaused = item.status === `paused`;
+                            let currConc = item.concurrency || (item.freq <= 3 ? 16 : item.freq <= 5 ? 12 : item.freq <= 10 ? 8 : item.freq <= 15 ? 6 : 4);
                             return (0, $.jsxs)(
                               `tr`,
                               {
@@ -46612,6 +46638,26 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                   (0, $.jsx)(`td`, {
                                     className: `py-2.5 px-3 text-slate-600 font-medium text-xs`,
                                     children: item.name || `常规轮询策略`,
+                                  }),
+                                  (0, $.jsx)(`td`, {
+                                    className: `py-2.5 px-3 text-center`,
+                                    children: (0, $.jsxs)(`div`, {
+                                      className: `inline-flex items-center gap-1.5 bg-blue-50/70 border border-blue-200/80 rounded-lg px-2 py-0.5 shadow-2xs`,
+                                      children: [
+                                        (0, $.jsx)(`input`, {
+                                          type: `number`,
+                                          min: 1,
+                                          max: 64,
+                                          value: currConc,
+                                          onChange: (e) => handleUpdateFreqConcurrency(item.freq, e.target.value),
+                                          className: `w-12 h-6 text-center border border-slate-300 rounded text-xs font-mono font-bold text-blue-700 bg-white focus:border-[#0066FF] focus:ring-1 focus:ring-[#0066FF] transition-all outline-none`,
+                                        }),
+                                        (0, $.jsx)(`span`, {
+                                          className: `text-[11px] font-bold text-blue-600`,
+                                          children: `线程`,
+                                        }),
+                                      ],
+                                    }),
                                   }),
                                   (0, $.jsx)(`td`, {
                                     className: `py-2.5 px-3 text-center`,
