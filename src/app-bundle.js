@@ -24240,7 +24240,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                     badge: `bg-purple-100 text-purple-800 border-purple-200`,
                   };
     return (0, $.jsxs)(`div`, {
-      className: `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3`,
+      className: t === `keyword` ? `grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3` : `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3`,
       children: [
         (0, $.jsxs)(`div`, {
           className: `bg-white border ${l.border} bg-gradient-to-br ${l.bg} rounded-xl p-3.5 flex items-center justify-between shadow-xs ${l.hover} transition-all`,
@@ -24302,7 +24302,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
             }),
           ],
         }),
-        (0, $.jsxs)(`div`, {
+        t !== `keyword` && (0, $.jsxs)(`div`, {
           className: `bg-white border border-slate-200/80 rounded-xl p-3.5 flex items-center justify-between shadow-xs hover:border-slate-300 transition-all`,
           children: [
             (0, $.jsxs)(`div`, {
@@ -24783,7 +24783,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                 })
               : t === `keyword`
                 ? (0, $.jsxs)(`div`, {
-                    className: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-end`,
+                    className: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 items-end`,
                     children: [
                       (0, $.jsxs)(`div`, {
                         className: `flex flex-col gap-1.5 sm:col-span-2 lg:col-span-2`,
@@ -24798,46 +24798,6 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                             onChange: (e) => n(`svcName`, e.target.value),
                             placeholder: `搜索抖音、头条、小红书、知乎、微博、B站、爱奇艺等...`,
                             className: `h-9 px-3 border border-slate-200 rounded-lg bg-slate-50/70 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-rose-500 focus:ring-2 focus:ring-rose-500/12 transition-all outline-none`,
-                          }),
-                        ],
-                      }),
-                      (0, $.jsxs)(`div`, {
-                        className: `flex flex-col gap-1.5`,
-                        children: [
-                          (0, $.jsx)(`label`, {
-                            className: `text-[11.5px] font-bold text-slate-600`,
-                            children: `轮询周期`,
-                          }),
-                          (0, $.jsxs)(`select`, {
-                            value: e.freq,
-                            onChange: (e) => n(`freq`, e.target.value),
-                            className: `h-9 px-3 border border-slate-200 rounded-lg bg-slate-50/70 text-xs text-slate-800 focus:bg-white focus:border-rose-500 focus:ring-2 focus:ring-rose-500/12 transition-all outline-none cursor-pointer`,
-                            children: [
-                              (0, $.jsx)(`option`, {
-                                value: ``,
-                                children: `全部周期`,
-                              }),
-                              (0, $.jsx)(`option`, {
-                                value: `5min`,
-                                children: `5分钟 (实时突发)`,
-                              }),
-                              (0, $.jsx)(`option`, {
-                                value: `10min`,
-                                children: `10分钟 (常规高频)`,
-                              }),
-                              (0, $.jsx)(`option`, {
-                                value: `15min`,
-                                children: `15分钟 (稳健平衡)`,
-                              }),
-                              (0, $.jsx)(`option`, {
-                                value: `20min`,
-                                children: `20分钟`,
-                              }),
-                              (0, $.jsx)(`option`, {
-                                value: `30min`,
-                                children: `30分钟 (中频观察)`,
-                              }),
-                            ],
                           }),
                         ],
                       }),
@@ -25170,7 +25130,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
             (0, $.jsxs)(`div`, {
               className: `flex items-center gap-2.5 ml-auto`,
               children: [
-                a &&
+                t !== `keyword` && a &&
                   (0, $.jsxs)(`button`, {
                     type: `button`,
                     onClick: a,
@@ -47418,13 +47378,13 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         (0, $.jsxs)(`div`, {
           className: `bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-col gap-3.5`,
           children: [
-            /* Unified Query Toolbar: Search, Platform, Category (Dropdown), Tier (Dropdown), Status (Dropdown), Sort */
+            /* Unified Query Toolbar: Search, Platform, Tier (Dropdown), Status (Dropdown), Sort */
             (0, $.jsxs)(`div`, {
               className: `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-12 gap-3 items-center`,
               children: [
                 /* 1. Search Input */
                 (0, $.jsxs)(`div`, {
-                  className: `relative lg:col-span-3`,
+                  className: `relative lg:col-span-4`,
                   children: [
                     (0, $.jsx)(Be, {
                       className: `w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2`,
@@ -47433,14 +47393,14 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                       type: `text`,
                       value: kwSearch,
                       onChange: (e) => setKwSearch(e.target.value),
-                      placeholder: `搜索关键词、拓展词、分类、所属平台...`,
+                      placeholder: `搜索关键词、拓展词、所属平台...`,
                       className: `w-full pl-9 pr-3 py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/10 transition-all`,
                     }),
                   ],
                 }),
                 /* 2. Platform Dropdown */
                 (0, $.jsxs)(`div`, {
-                  className: `flex items-center gap-1.5 lg:col-span-2`,
+                  className: `flex items-center gap-1.5 lg:col-span-3`,
                   children: [
                     (0, $.jsxs)(`select`, {
                       value: selectedPlatform,
@@ -47456,30 +47416,6 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                               children: `${tn[pKey]?.name || pKey} (${platformStats[pKey]?.count || 0})`,
                             },
                             pKey,
-                          ),
-                        ),
-                      ],
-                    }),
-                  ],
-                }),
-                /* 3. Category Dropdown */
-                (0, $.jsxs)(`div`, {
-                  className: `flex items-center gap-1.5 lg:col-span-2`,
-                  children: [
-                    (0, $.jsxs)(`select`, {
-                      value: selectedCategory,
-                      onChange: (e) => setSelectedCategory(e.target.value),
-                      className: `w-full py-2 px-3 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/10 cursor-pointer`,
-                      children: [
-                        (0, $.jsx)(`option`, { value: `all`, children: `行业分类: 全部` }),
-                        allCategoriesList.map((cat) =>
-                          (0, $.jsx)(
-                            `option`,
-                            {
-                              value: cat,
-                              children: `分类: ${cat}`,
-                            },
-                            cat,
                           ),
                         ),
                       ],
@@ -47743,7 +47679,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                         children: [
                           (0, $.jsx)(`th`, {
                             className: `py-3 px-4 min-w-[180px]`,
-                            children: `监控关键词与分类`,
+                            children: `监控关键词`,
                           }),
                           (0, $.jsx)(`th`, {
                             className: `py-3 px-3 min-w-[120px]`,
@@ -47830,7 +47766,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                       {
                                         className: `hover:bg-slate-50/80 transition-colors group ${isExpanded ? `bg-rose-50/20` : ``}`,
                                         children: [
-                                          /* Column 1: Keyword name, Category */                                          (0, $.jsx)(`td`, {                                            className: `py-3.5 px-4`,                                            children: (0, $.jsxs)(`div`, {                                              className: `flex items-center gap-2`,                                              children: [                                                (0, $.jsx)(`span`, {                                                  className: `font-extrabold text-slate-900 text-[13px] hover:text-rose-600 transition-colors cursor-pointer`,                                                  onClick: () => handleOpenEditModal(item),                                                  title: `点击编辑关键词策略`,                                                  children: item.keyword,                                                }),                                                (0, $.jsx)(`span`, {                                                  className: `px-1.5 py-0.5 rounded text-[10.5px] font-semibold bg-slate-100 text-slate-700 border border-slate-200`,                                                  children: item.category,                                                }),                                              ],                                            }),                                          }),                                          /* Column 2: Platform Name */                                          (0, $.jsx)(`td`, {                                            className: `py-3.5 px-3 whitespace-nowrap`,                                            children: (0, $.jsx)(`span`, {                                              className: `inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border ${pMeta.badgeBg || `bg-slate-100`} ${pMeta.badgeText || `text-slate-800`} ${pMeta.borderClass || `border-slate-200`} shadow-2xs`,                                              children: pMeta.name,                                            }),                                          }),                                          /* Column 3: Polling Frequency */                                          (0, $.jsx)(`td`, {                                            className: `py-3.5 px-3 whitespace-nowrap`,                                            children: (0, $.jsxs)(`span`, {                                              className: `inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/90 shadow-2xs`,                                              children: [item.pollIntervalMinutes || 10, `分钟/轮`],                                            }),                                          }),                                          /* Column 4: 采集数据最新发布时间 (样式类似 ID自增长 · 服务列表) */
+                                          /* Column 1: Keyword name */                                          (0, $.jsx)(`td`, {                                            className: `py-3.5 px-4`,                                            children: (0, $.jsx)(`div`, {                                              className: `flex items-center gap-2`,                                              children: (0, $.jsx)(`span`, {                                                  className: `font-extrabold text-slate-900 text-[13px] hover:text-rose-600 transition-colors cursor-pointer`,                                                  onClick: () => handleOpenEditModal(item),                                                  title: `点击编辑关键词策略`,                                                  children: item.keyword,                                                }),                                            }),                                          }),                                          /* Column 2: Platform Name */                                          (0, $.jsx)(`td`, {                                            className: `py-3.5 px-3 whitespace-nowrap`,                                            children: (0, $.jsx)(`span`, {                                              className: `inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border ${pMeta.badgeBg || `bg-slate-100`} ${pMeta.badgeText || `text-slate-800`} ${pMeta.borderClass || `border-slate-200`} shadow-2xs`,                                              children: pMeta.name,                                            }),                                          }),                                          /* Column 3: Polling Frequency */                                          (0, $.jsx)(`td`, {                                            className: `py-3.5 px-3 whitespace-nowrap`,                                            children: (0, $.jsxs)(`span`, {                                              className: `inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/90 shadow-2xs`,                                              children: [item.pollIntervalMinutes || 10, `分钟/轮`],                                            }),                                          }),                                          /* Column 4: 采集数据最新发布时间 (样式类似 ID自增长 · 服务列表) */
                                           (0, $.jsx)(`td`, {
                                             className: `py-3.5 px-3 whitespace-nowrap`,
                                             children: (0, $.jsxs)(`div`, {
@@ -48174,43 +48110,19 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                       ],
                     }),
 
-                    /* Category and Importance */
+                    /* Importance */
                     (0, $.jsxs)(`div`, {
-                      className: `grid grid-cols-2 gap-3`,
+                      className: `flex flex-col gap-1.5`,
                       children: [
-                        (0, $.jsxs)(`div`, {
-                          className: `flex flex-col gap-1.5`,
+                        (0, $.jsx)(`label`, { className: `font-bold text-slate-700`, children: `监控优先级` }),
+                        (0, $.jsxs)(`select`, {
+                          value: formImportance,
+                          onChange: (e) => setFormImportance(e.target.value),
+                          className: `w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 cursor-pointer`,
                           children: [
-                            (0, $.jsx)(`label`, { className: `font-bold text-slate-700`, children: `行业分类` }),
-                            (0, $.jsxs)(`select`, {
-                              value: formCategory,
-                              onChange: (e) => setFormCategory(e.target.value),
-                              className: `w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500`,
-                              children: [
-                                `前沿科技`,
-                                `产业制造`,
-                                `商业财经`,
-                                `民生社会`,
-                                `消费文娱`,
-                                `医疗健康`,
-                              ].map((cat) => (0, $.jsx)(`option`, { value: cat, children: cat }, cat)),
-                            }),
-                          ],
-                        }),
-                        (0, $.jsxs)(`div`, {
-                          className: `flex flex-col gap-1.5`,
-                          children: [
-                            (0, $.jsx)(`label`, { className: `font-bold text-slate-700`, children: `监控优先级` }),
-                            (0, $.jsxs)(`select`, {
-                              value: formImportance,
-                              onChange: (e) => setFormImportance(e.target.value),
-                              className: `w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500`,
-                              children: [
-                                (0, $.jsx)(`option`, { value: `P0`, children: `P0 · 核心重点监控` }),
-                                (0, $.jsx)(`option`, { value: `P1`, children: `P1 · 重点业务追踪` }),
-                                (0, $.jsx)(`option`, { value: `P2`, children: `P2 · 常规长尾采集` }),
-                              ],
-                            }),
+                            (0, $.jsx)(`option`, { value: `P0`, children: `P0 · 核心重点监控` }),
+                            (0, $.jsx)(`option`, { value: `P1`, children: `P1 · 重点业务追踪` }),
+                            (0, $.jsx)(`option`, { value: `P2`, children: `P2 · 常规长尾采集` }),
                           ],
                         }),
                       ],
@@ -67263,7 +67175,7 @@ function Un() {
                         (0, $.jsxs)(`div`, {
                           className: `flex items-center gap-2.5 shrink-0`,
                           children: [
-                            (0, $.jsxs)(`button`, {
+                            e !== `keyword` && (0, $.jsxs)(`button`, {
                               type: `button`,
                               onClick: () => handleAddService(),
                               className: `px-3.5 py-1.5 rounded-lg bg-[#0066FF] hover:bg-[#0052cc] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer`,
