@@ -25835,6 +25835,75 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
           totalKeywords: platKw.length
         };
       },
+      getAccountFreqServices = (svc) => {
+        let platInfo = pe(svc),
+          pName = platInfo.platformName || (svc.name || '').replace(/[-_]账号轮询.*$/, '').replace(/全网.*$/, ''),
+          stat = (l && l[svc.id]) || {},
+          rule = (u && u[svc.id]) || {},
+          total = stat.totalLedgers || svc.totalLedgers || 100000,
+          p0Cnt = stat.p0Count || Math.round(total * 0.015) || 1250,
+          p1Cnt = stat.p1Count || Math.round(total * 0.15) || 24000,
+          p2Cnt = stat.p2Count || Math.round(total * 0.45) || 145000,
+          p3Cnt = stat.p3Count || Math.max(10, total - p0Cnt - p1Cnt - p2Cnt),
+          p0M = rule.p0IntervalMinutes || 5,
+          p1M = rule.p1IntervalMinutes || 30,
+          p2M = rule.p2IntervalMinutes || 120,
+          p3M = rule.p3IntervalMinutes || 720,
+          formatM = (m) => m >= 60 && m % 60 === 0 ? `${m / 60}h/轮` : `${m}m/轮`;
+
+        let items = [
+          {
+            id: `${svc.id}-P0`,
+            level: 'P0 突发核心',
+            freq: p0M,
+            freqText: formatM(p0M),
+            concurrency: 16,
+            ledgerCount: p0Cnt,
+            dotClass: 'bg-rose-500',
+            estPolls: Math.round(p0Cnt * (1440 / Math.max(1, p0M))),
+            status: '高频巡检'
+          },
+          {
+            id: `${svc.id}-P1`,
+            level: 'P1 重点活跃',
+            freq: p1M,
+            freqText: formatM(p1M),
+            concurrency: 12,
+            ledgerCount: p1Cnt,
+            dotClass: 'bg-orange-500',
+            estPolls: Math.round(p1Cnt * (1440 / Math.max(1, p1M))),
+            status: '常态轮询'
+          },
+          {
+            id: `${svc.id}-P2`,
+            level: 'P2 常规监控',
+            freq: p2M,
+            freqText: formatM(p2M),
+            concurrency: 8,
+            ledgerCount: p2Cnt,
+            dotClass: 'bg-blue-500',
+            estPolls: Math.round(p2Cnt * (1440 / Math.max(1, p2M))),
+            status: '平稳调度'
+          },
+          {
+            id: `${svc.id}-P3`,
+            level: 'P3 长尾深度',
+            freq: p3M,
+            freqText: formatM(p3M),
+            concurrency: 4,
+            ledgerCount: p3Cnt,
+            dotClass: 'bg-slate-400',
+            estPolls: Math.round(p3Cnt * (1440 / Math.max(1, p3M))),
+            status: '低频兜底'
+          }
+        ];
+
+        return {
+          platformName: pName,
+          items,
+          totalLedgers: total
+        };
+      },
       _e = d || (V.length > 0 ? V[0].method : `auto`),
       ye = _e === `auto`,
       be = _e === `plate`,
@@ -25843,11 +25912,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
       ke = _e === `deep`,
       we = ye
         ? `最新成果采集URL`
-        : xe
-          ? `监控台账规模 / 分级频控规则`
-          : Se
-            ? `关键词数量`
-            : `采集频率`,
+        : `采集频率`,
       Te = Se
         ? `最近轮询调度时间`
         : _e === `plate`
@@ -25914,12 +25979,12 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                         className: `py-3 px-4 w-[125px] whitespace-nowrap`,
                         children: `台账数量`,
                       }),
-                    Se
+                    xe
                       ? (0, $.jsxs)($.Fragment, {
                           children: [
                             (0, $.jsx)(`th`, {
-                              className: `py-3 px-4 w-[130px] whitespace-nowrap`,
-                              children: `关键词数量`,
+                              className: `py-3 px-4 w-[125px] whitespace-nowrap`,
+                              children: `台账数量`,
                             }),
                             (0, $.jsx)(`th`, {
                               className: `py-3 px-4 min-w-[140px] whitespace-nowrap`,
@@ -25927,10 +25992,23 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                             }),
                           ],
                         })
-                      : (0, $.jsx)(`th`, {
-                          className: `py-3 px-4 whitespace-nowrap ${ye ? `min-w-[250px]` : xe ? `min-w-[310px]` : `w-[130px]`}`,
-                          children: we,
-                        }),
+                      : Se
+                        ? (0, $.jsxs)($.Fragment, {
+                            children: [
+                              (0, $.jsx)(`th`, {
+                                className: `py-3 px-4 w-[130px] whitespace-nowrap`,
+                                children: `关键词数量`,
+                              }),
+                              (0, $.jsx)(`th`, {
+                                className: `py-3 px-4 min-w-[140px] whitespace-nowrap`,
+                                children: `采集频率`,
+                              }),
+                            ],
+                          })
+                        : (0, $.jsx)(`th`, {
+                            className: `py-3 px-4 whitespace-nowrap ${ye ? `min-w-[250px]` : `w-[130px]`}`,
+                            children: we,
+                          }),
                     !xe &&
                       (0, $.jsx)(`th`, {
                         className: `py-3 px-4 min-w-[160px] whitespace-nowrap`,
@@ -25965,7 +26043,7 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                   V.length === 0
                     ? (0, $.jsx)(`tr`, {
                         children: (0, $.jsx)(`td`, {
-                          colSpan: be || ke ? 9 : xe ? 7 : 8,
+                          colSpan: be || ke ? 9 : 8,
                           className: `py-12 text-center text-slate-400`,
                           children: (0, $.jsxs)(`div`, {
                             className: `flex flex-col items-center gap-2`,
@@ -26340,280 +26418,301 @@ User-Agent: FastNewsApp/8.4.1 (Android 14; Build/UP1A.231005.007)`,
                                       }),
                                     ],
                                   })
-                                : (0, $.jsx)(`td`, {
-                                className: `py-3 px-4 ${ye ? `min-w-[250px]` : `whitespace-nowrap`}`,
-                                children: ye
-                                  ? (() => {
-                                      let t = X(e);
-                                      return (0, $.jsxs)(`div`, {
-                                        className: `flex flex-col gap-1 max-w-[280px]`,
-                                        children: [
-                                          (0, $.jsxs)(`div`, {
-                                            className: `flex items-center gap-1.5`,
-                                            children: [
-                                              (0, $.jsxs)(`span`, {
-                                                className: `font-mono text-[10.5px] font-bold px-1.5 py-0.2 rounded bg-purple-50 text-purple-900 border border-purple-200 shrink-0 shadow-2xs`,
-                                                children: [`ID:`, t.id],
-                                              }),
-                                              (0, $.jsxs)(`div`, {
-                                                className: `flex items-center gap-1 shrink-0`,
-                                                children: [
-                                                  (0, $.jsx)(`button`, {
-                                                    type: `button`,
-                                                    onClick: (e) => G(e, t.url),
-                                                    className: `p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-700 transition-colors cursor-pointer`,
-                                                    title: `复制最新采集成果URL`,
-                                                    children:
-                                                      U === t.url
-                                                        ? (0, $.jsx)(P, {
-                                                            className: `w-3.5 h-3.5 text-emerald-600`,
-                                                          })
-                                                        : (0, $.jsx)(oe, {
+                                : C
+                                  ? (0, $.jsxs)($.Fragment, {
+                                      children: [
+                                        (0, $.jsx)(`td`, {
+                                          className: `py-3 px-4 w-[125px] whitespace-nowrap`,
+                                          children: (() => {
+                                            let stat = (l && l[e.id]);
+                                            let count = stat?.totalLedgers || e.totalLedgers || e.ledgerCount || 94600;
+                                            return (0, $.jsx)(`button`, {
+                                              type: `button`,
+                                              onClick: (evt) => {
+                                                evt.stopPropagation();
+                                                if (y) y(e.id);
+                                                else if (v) v(e);
+                                              },
+                                              className: `font-mono font-black text-[13.5px] text-amber-600 hover:text-amber-800 hover:underline cursor-pointer transition-colors px-2 py-0.5 rounded hover:bg-amber-50/80 inline-flex items-center gap-1`,
+                                              title: `点击跳转至【账号轮询 · 目标台账】查看【${e.name}】监控台账 (${count.toLocaleString()}个台账)`,
+                                              children: count.toLocaleString(),
+                                            });
+                                          })(),
+                                        }),
+                                        (0, $.jsx)(`td`, {
+                                          className: `py-3 px-4 min-w-[130px] whitespace-nowrap`,
+                                          children: (() => {
+                                            let freqData = getAccountFreqServices(e),
+                                              items = freqData.items,
+                                              isOpen = freqPopoverSvcId === e.id;
+                                            return (0, $.jsxs)(`div`, {
+                                              className: `relative inline-block`,
+                                              children: [
+                                                (0, $.jsxs)(`button`, {
+                                                  type: `button`,
+                                                  onClick: (t) => {
+                                                    t.stopPropagation();
+                                                    se(null);
+                                                    setFreqPopoverSvcId(isOpen ? null : e.id);
+                                                  },
+                                                  className: `inline-flex items-center gap-1.5 font-mono text-[11.5px] font-semibold px-2.5 py-0.5 rounded border transition-all cursor-pointer ${
+                                                    isOpen
+                                                      ? `bg-amber-50 text-amber-700 border-amber-400 ring-2 ring-amber-500/20 shadow-xs font-bold`
+                                                      : `text-slate-800 bg-slate-100/90 hover:bg-amber-50/80 border-slate-200/90 hover:border-amber-300`
+                                                  }`,
+                                                  onMouseEnter: (t) => {
+                                                    isOpen ||
+                                                      K(
+                                                        t,
+                                                        `【${freqData.platformName}】采集频率 (${items.length}个频率)`,
+                                                        `text-amber-600`,
+                                                        `点击展开查看分级采集频率、Worker并发与台账分布`,
+                                                      );
+                                                  },
+                                                  onMouseLeave: q,
+                                                  title: `点击展开查看分级采集频率 (${items.length}个频率)`,
+                                                  children: [
+                                                    (0, $.jsx)(`span`, {
+                                                      className: `w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 ${items.length > 1 ? `animate-pulse` : ``}`,
+                                                    }),
+                                                    (0, $.jsxs)(`span`, {
+                                                      className: `font-bold`,
+                                                      children: [items.length, `个频率`],
+                                                    }),
+                                                    (0, $.jsx)(`svg`, {
+                                                      className: `w-3 h-3 text-slate-400 transition-transform ${isOpen ? `rotate-180 text-amber-600` : ``}`,
+                                                      viewBox: `0 0 20 20`,
+                                                      fill: `currentColor`,
+                                                      children: (0, $.jsx)(`path`, {
+                                                        fillRule: `evenodd`,
+                                                        d: `M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z`,
+                                                        clipRule: `evenodd`,
+                                                      }),
+                                                    }),
+                                                  ],
+                                                }),
+                                                isOpen &&
+                                                  (0, $.jsxs)(`div`, {
+                                                    className: `absolute left-0 top-full mt-1.5 z-50 bg-white border border-slate-200 rounded-xl shadow-xl p-3.5 w-[500px] text-left animate-in fade-in zoom-in-95 duration-150`,
+                                                    onClick: (t) => t.stopPropagation(),
+                                                    children: [
+                                                      (0, $.jsxs)(`div`, {
+                                                        className: `flex items-center justify-between pb-2 mb-2 border-b border-slate-100`,
+                                                        children: [
+                                                          (0, $.jsxs)(`div`, {
+                                                            className: `flex items-center gap-1.5`,
+                                                            children: [
+                                                              (0, $.jsx)(`span`, { className: `w-2 h-2 rounded-full bg-amber-500` }),
+                                                              (0, $.jsx)(`span`, { className: `text-xs font-bold text-slate-800`, children: `【${freqData.platformName}】分级采集频率与调度` }),
+                                                            ],
+                                                          }),
+                                                          g &&
+                                                            (0, $.jsxs)(`button`, {
+                                                              type: `button`,
+                                                              onClick: (t) => {
+                                                                t.stopPropagation();
+                                                                setFreqPopoverSvcId(null);
+                                                                g(e);
+                                                              },
+                                                              className: `text-[11px] font-bold text-amber-700 hover:text-amber-900 hover:underline flex items-center gap-0.5 cursor-pointer`,
+                                                              children: [`配置频控规则`, (0, $.jsx)(`span`, { children: `→` })],
+                                                            }),
+                                                        ],
+                                                      }),
+                                                      (0, $.jsxs)(`table`, {
+                                                        className: `w-full border-collapse text-left`,
+                                                        children: [
+                                                          (0, $.jsx)(`thead`, {
+                                                            children: (0, $.jsxs)(`tr`, {
+                                                              className: `border-b border-slate-100 text-[11px] font-bold text-slate-500`,
+                                                              children: [
+                                                                (0, $.jsx)(`th`, {
+                                                                  className: `pb-2 font-bold whitespace-nowrap`,
+                                                                  children: `采集频率`,
+                                                                }),
+                                                                (0, $.jsx)(`th`, {
+                                                                  className: `pb-2 text-center font-bold whitespace-nowrap`,
+                                                                  children: `并发线程数`,
+                                                                }),
+                                                                (0, $.jsx)(`th`, {
+                                                                  className: `pb-2 text-center font-bold whitespace-nowrap`,
+                                                                  children: `台账数量`,
+                                                                }),
+                                                                (0, $.jsx)(`th`, {
+                                                                  className: `pb-2 text-right font-bold whitespace-nowrap`,
+                                                                  children: `预估日抓取`,
+                                                                }),
+                                                                (0, $.jsx)(`th`, {
+                                                                  className: `pb-2 text-right font-bold whitespace-nowrap`,
+                                                                  children: `调度状态`,
+                                                                }),
+                                                              ],
+                                                            }),
+                                                          }),
+                                                          (0, $.jsx)(`tbody`, {
+                                                            className: `divide-y divide-slate-100`,
+                                                            children: items.map((sub, idx) =>
+                                                              (0, $.jsxs)(
+                                                                `tr`,
+                                                                {
+                                                                  className: `hover:bg-slate-50/70 transition-colors`,
+                                                                  children: [
+                                                                    (0, $.jsx)(`td`, {
+                                                                      className: `py-2 whitespace-nowrap`,
+                                                                      children: (0, $.jsxs)(`div`, {
+                                                                        className: `flex items-center gap-1.5 font-mono text-[11.5px] font-bold text-slate-800`,
+                                                                        children: [
+                                                                          (0, $.jsx)(`span`, {
+                                                                            className: `w-1.5 h-1.5 rounded-full ${sub.dotClass || `bg-amber-500`} shrink-0`,
+                                                                          }),
+                                                                          (0, $.jsx)(`span`, {
+                                                                            children: sub.freqText,
+                                                                          }),
+                                                                          (0, $.jsx)(`span`, {
+                                                                            className: `text-[10px] font-sans font-medium px-1 rounded bg-slate-100 text-slate-600 border border-slate-200`,
+                                                                            children: sub.level,
+                                                                          }),
+                                                                        ],
+                                                                      }),
+                                                                    }),
+                                                                    (0, $.jsx)(`td`, {
+                                                                      className: `py-2 text-center whitespace-nowrap`,
+                                                                      children: (0, $.jsxs)(`span`, {
+                                                                        className: `inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60`,
+                                                                        children: [sub.concurrency, ` 线程`],
+                                                                      }),
+                                                                    }),
+                                                                    (0, $.jsx)(`td`, {
+                                                                      className: `py-2 text-center whitespace-nowrap`,
+                                                                      children: (0, $.jsxs)(`button`, {
+                                                                        type: `button`,
+                                                                        onClick: (t) => {
+                                                                          t.stopPropagation();
+                                                                          setFreqPopoverSvcId(null);
+                                                                          if (y) y(e.id);
+                                                                          else if (v) v(e);
+                                                                        },
+                                                                        className: `inline-flex items-center gap-1 font-mono text-[11.5px] font-bold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100/90 px-2 py-0.5 rounded border border-amber-200/80 hover:border-amber-300 transition-all cursor-pointer shadow-2xs group`,
+                                                                        title: `点击跳转至【账号轮询 · 目标台账】查看【${freqData.platformName}】台账`,
+                                                                        children: [
+                                                                          (0, $.jsxs)(`span`, {
+                                                                            className: `group-hover:underline`,
+                                                                            children: [sub.ledgerCount.toLocaleString(), `个`],
+                                                                          }),
+                                                                          (0, $.jsx)(`svg`, {
+                                                                            className: `w-2.5 h-2.5 text-amber-500 group-hover:text-amber-700 transition-transform group-hover:translate-x-0.5`,
+                                                                            fill: `none`,
+                                                                            viewBox: `0 0 24 24`,
+                                                                            stroke: `currentColor`,
+                                                                            strokeWidth: `2.5`,
+                                                                            children: (0, $.jsx)(`path`, {
+                                                                              strokeLinecap: `round`,
+                                                                              strokeLinejoin: `round`,
+                                                                              d: `M9 5l7 7-7 7`,
+                                                                            }),
+                                                                          }),
+                                                                        ],
+                                                                      }),
+                                                                    }),
+                                                                    (0, $.jsx)(`td`, {
+                                                                      className: `py-2 text-right whitespace-nowrap font-mono text-[11.5px] font-bold text-slate-700`,
+                                                                      children: (0, $.jsxs)(`span`, {
+                                                                        children: [
+                                                                          sub.estPolls >= 10000
+                                                                            ? (sub.estPolls / 10000).toFixed(1) + `万`
+                                                                            : sub.estPolls.toLocaleString(),
+                                                                          ` 次/日`,
+                                                                        ],
+                                                                      }),
+                                                                    }),
+                                                                    (0, $.jsx)(`td`, {
+                                                                      className: `py-2 text-right whitespace-nowrap`,
+                                                                      children: (0, $.jsx)(`span`, {
+                                                                        className: `inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60`,
+                                                                        children: sub.status,
+                                                                      }),
+                                                                    }),
+                                                                  ],
+                                                                },
+                                                                sub.id || idx,
+                                                              ),
+                                                            ),
+                                                          }),
+                                                        ],
+                                                      }),
+                                                    ],
+                                                  }),
+                                              ],
+                                            });
+                                          })(),
+                                        }),
+                                      ],
+                                    })
+                                  : (0, $.jsx)(`td`, {
+                                      className: `py-3 px-4 ${ye ? `min-w-[250px]` : `whitespace-nowrap`}`,
+                                      children: ye
+                                        ? (() => {
+                                            let t = X(e);
+                                            return (0, $.jsxs)(`div`, {
+                                              className: `flex flex-col gap-1 max-w-[280px]`,
+                                              children: [
+                                                (0, $.jsxs)(`div`, {
+                                                  className: `flex items-center gap-1.5`,
+                                                  children: [
+                                                    (0, $.jsxs)(`span`, {
+                                                      className: `font-mono text-[10.5px] font-bold px-1.5 py-0.2 rounded bg-purple-50 text-purple-900 border border-purple-200 shrink-0 shadow-2xs`,
+                                                      children: [`ID:`, t.id],
+                                                    }),
+                                                    (0, $.jsxs)(`div`, {
+                                                      className: `flex items-center gap-1 shrink-0`,
+                                                      children: [
+                                                        (0, $.jsx)(`button`, {
+                                                          type: `button`,
+                                                          onClick: (e) => G(e, t.url),
+                                                          className: `p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-700 transition-colors cursor-pointer`,
+                                                          title: `复制最新采集成果URL`,
+                                                          children:
+                                                            U === t.url
+                                                              ? (0, $.jsx)(P, {
+                                                                  className: `w-3.5 h-3.5 text-emerald-600`,
+                                                                })
+                                                              : (0, $.jsx)(oe, {
+                                                                  className: `w-3.5 h-3.5`,
+                                                                }),
+                                                        }),
+                                                        (0, $.jsx)(`a`, {
+                                                          href: t.url,
+                                                          target: `_blank`,
+                                                          rel: `noreferrer`,
+                                                          onClick: (e) =>
+                                                            e.stopPropagation(),
+                                                          className: `p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-[#0066FF] transition-colors cursor-pointer`,
+                                                          title: `新窗口打开目标URL`,
+                                                          children: (0, $.jsx)(ce, {
                                                             className: `w-3.5 h-3.5`,
                                                           }),
-                                                  }),
-                                                  (0, $.jsx)(`a`, {
-                                                    href: t.url,
-                                                    target: `_blank`,
-                                                    rel: `noreferrer`,
-                                                    onClick: (e) =>
-                                                      e.stopPropagation(),
-                                                    className: `p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-[#0066FF] transition-colors cursor-pointer`,
-                                                    title: `新窗口打开目标URL`,
-                                                    children: (0, $.jsx)(ce, {
-                                                      className: `w-3.5 h-3.5`,
+                                                        }),
+                                                      ],
                                                     }),
-                                                  }),
-                                                ],
-                                              }),
-                                            ],
-                                          }),
-                                          (0, $.jsx)(`a`, {
-                                            href: t.url,
-                                            target: `_blank`,
-                                            rel: `noreferrer`,
-                                            onClick: (e) => e.stopPropagation(),
-                                            className: `font-mono text-[11.5px] text-slate-600 hover:text-[#0066FF] hover:underline truncate block transition-colors leading-tight`,
-                                            title: `最新成果URL: ${t.url}`,
-                                            children: t.url,
-                                          }),
-                                        ],
-                                      });
-                                    })()
-                                  : (() => {
-                                      if (C) {
-                                        let t = l?.[e.id],
-                                          n = u?.[e.id],
-                                          r = `${((t?.totalLedgers || 3e5) / 1e4).toFixed(1)}万 执行台账`;
-                                        return (0, $.jsxs)(`div`, {
-                                          className: `flex items-center gap-1.5 flex-wrap py-0.5 min-w-[280px]`,
-                                          children: [
-                                            g &&
-                                              (0, $.jsxs)(`button`, {
-                                                type: `button`,
-                                                onClick: (t) => {
-                                                  (t.stopPropagation(),
-                                                    g(e));
-                                                },
-                                                className: `inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-amber-100/90 text-amber-900 hover:bg-amber-200 border border-amber-300 transition-colors cursor-pointer shadow-2xs`,
-                                                title: `配置该平台数十万台账的分级采集频率规则`,
-                                                children: [
-                                                  (0, $.jsx)(qe, {
-                                                    className: `w-3 h-3 text-amber-700`,
-                                                  }),
-                                                  (0, $.jsx)(`span`, {
-                                                    children: `频控规则`,
-                                                  }),
-                                                ],
-                                              }),
-                                            v &&
-                                              (0, $.jsxs)(`button`, {
-                                                type: `button`,
-                                                onClick: (t) => {
-                                                  (t.stopPropagation(),
-                                                    v(e));
-                                                },
-                                                onMouseEnter: (n) =>
-                                                  K(
-                                                    n,
-                                                    `${e.name} · 监控台账规模`,
-                                                    `text-amber-600`,
-                                                    t
-                                                      ? `总监控台账: ${t.totalLedgers.toLocaleString()} 个 (P0核心: ${t.p0Count.toLocaleString()} | P1重点: ${t.p1Count.toLocaleString()} | P2常规: ${t.p2Count.toLocaleString()} | P3长尾: ${t.p3Count.toLocaleString()})；预计日总抓取 ${t.estDailyPolls.toLocaleString()} 次，峰值 QPS ~${t.estPeakQps}`
-                                                      : `承载数十万监控台账`,
-                                                  ),
-                                                onMouseLeave: q,
-                                                className: `inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 border border-slate-300 transition-colors cursor-pointer shadow-2xs`,
-                                                title: `查看具体执行台账队列与实时调度流水`,
-                                                children: [
-                                                  (0, $.jsx)(Fe, {
-                                                    className: `w-3 h-3 text-amber-600 animate-pulse`,
-                                                  }),
-                                                  (0, $.jsx)(`span`, {
-                                                    children: r,
-                                                  }),
-                                                ],
-                                              }),
-                                            y &&
-                                              (0, $.jsxs)(`button`, {
-                                                type: `button`,
-                                                onClick: (t) => {
-                                                  (t.stopPropagation(),
-                                                    y(e.id));
-                                                },
-                                                className: `inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-900 border border-blue-200 transition-colors cursor-pointer shadow-2xs`,
-                                                title: `进入该平台的监控目标台账与分级频控大盘`,
-                                                children: [
-                                                  (0, $.jsx)(ce, {
-                                                    className: `w-3 h-3 text-blue-600`,
-                                                  }),
-                                                  (0, $.jsx)(`span`, {
-                                                    children: `平台大盘`,
-                                                  }),
-                                                ],
-                                              }),
-                                          ],
-                                        });
-                                      }
-                                      if (w) {
-                                         let t = a?.[e.id],
-                                           n = t?.boundKeywords || [
-                                             `具身智能人形机器人`,
-                                             `低空经济eVTOL商业化`,
-                                             `新能源汽车出海加征关税`,
-                                           ],
-                                           r = t?.pollIntervalMinutes || 10;
-                                         return (0, $.jsxs)(`div`, {
-                                           className: `flex items-center gap-1.5 flex-wrap py-0.5 min-w-[270px]`,
-                                           children: [
-                                             (0, $.jsxs)(`span`, {
-                                               className: `inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-rose-50 text-rose-900 border border-rose-300 shadow-2xs cursor-default`,
-                                               onMouseEnter: (t) =>
-                                                 K(
-                                                   t,
-                                                   `${e.name} · 关键词矩阵`,
-                                                   `text-rose-500`,
-                                                   `已绑定 ${n.length} 个监控词，按 ${r}分钟/轮 周期轮询检索；支持多平台协同与毫秒排重`,
-                                                 ),
-                                               onMouseLeave: q,
-                                               children: [
-                                                 (0, $.jsx)(ve, {
-                                                   className: `w-3 h-3 text-rose-600`,
-                                                 }),
-                                                 (0, $.jsxs)(`span`, {
-                                                   children: [
-                                                     n.length,
-                                                     ` 个监控词`,
-                                                   ],
-                                                 }),
-                                               ],
-                                             }),
-                                             (0, $.jsxs)(`span`, {
-                                               className: `text-[10.5px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200`,
-                                               children: [r, `m/轮`],
-                                             }),
-                                             _ &&
-                                               (0, $.jsxs)(`button`, {
-                                                 type: `button`,
-                                                 onClick: (t) => {
-                                                   (t.stopPropagation(),
-                                                     _(e));
-                                                 },
-                                                 className: `inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-rose-100/90 text-rose-900 hover:bg-rose-200 border border-rose-300 transition-colors cursor-pointer shadow-2xs ml-auto`,
-                                                 title: `配置关键词列表与频控规则`,
-                                                 children: [
-                                                   (0, $.jsx)(qe, {
-                                                     className: `w-2.5 h-2.5`,
-                                                   }),
-                                                   (0, $.jsx)(`span`, {
-                                                     children: `配置`,
-                                                   }),
-                                                 ],
-                                               }),
-                                             x &&
-                                               (0, $.jsxs)(`button`, {
-                                                 type: `button`,
-                                                 onClick: (e) => {
-                                                   (e.stopPropagation(),
-                                                     x());
-                                                 },
-                                                 className: `inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer shadow-2xs`,
-                                                 title: `进入关键词矩阵大盘`,
-                                                 children: [
-                                                   (0, $.jsx)(ce, {
-                                                     className: `w-2.5 h-2.5 text-slate-500`,
-                                                   }),
-                                                   (0, $.jsx)(`span`, {
-                                                     children: `词库`,
-                                                   }),
-                                                 ],
-                                               }),
-                                           ],
-                                         });
-                                       }
-                                       if (e.method === `deep`) {
-                                        let freqText = (() => {
-                                          let m = e.name && e.name.match(/\((.*?)\)/);
-                                          if (m && m[1]) {
-                                            return m[1].includes(`/轮`) ? m[1] : `${m[1]}/轮`;
-                                          }
-                                          let f = e.freq || `1h`;
-                                          if (f === `daily`) return `24h/轮`;
-                                          return f.endsWith(`/轮`) ? f : `${f}/轮`;
-                                        })();
-                                        return (0, $.jsx)(`div`, {
-                                          className: `flex items-center`,
-                                          children: (0, $.jsxs)(`span`, {
-                                            className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300/80 shadow-2xs`,
-                                            children: [
-                                              (0, $.jsx)(`span`, {
-                                                className: `w-1.5 h-1.5 rounded-full bg-emerald-500`,
-                                              }),
-                                              (0, $.jsx)(`span`, {
-                                                children: freqText,
-                                              }),
-                                            ],
-                                          }),
-                                        });
-                                      }
-                                      let t = Y(e);
-                                      return (0, $.jsxs)(`div`, {
-                                        className: `flex flex-col gap-1`,
-                                        children: [
-                                          (0, $.jsx)(`div`, {
-                                            className: `flex items-center gap-1.5 flex-wrap`,
-                                            children: (0, $.jsxs)(`span`, {
-                                              className: `inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11.5px] font-mono font-bold border transition-colors cursor-default w-fit shadow-2xs ${t.badgeClass}`,
-                                              onMouseEnter: (e) =>
-                                                K(
-                                                  e,
-                                                  `${t.headerTitle} · ${t.label}`,
-                                                  t.dotClass.replace(
-                                                    `bg-`,
-                                                    `text-`,
-                                                  ),
-                                                  t.hint,
-                                                ),
-                                              onMouseLeave: q,
-                                              children: [
-                                                (0, $.jsx)(`span`, {
-                                                  className: `w-1.5 h-1.5 rounded-full shrink-0 ${t.dotClass}`,
+                                                  ],
                                                 }),
-                                                (0, $.jsx)(`span`, {
-                                                  children: t.label,
+                                                (0, $.jsx)(`a`, {
+                                                  href: t.url,
+                                                  target: `_blank`,
+                                                  rel: `noreferrer`,
+                                                  onClick: (e) => e.stopPropagation(),
+                                                  className: `font-mono text-[11.5px] text-slate-600 hover:text-[#0066FF] hover:underline truncate block transition-colors leading-tight`,
+                                                  title: `最新成果URL: ${t.url}`,
+                                                  children: t.url,
                                                 }),
                                               ],
-                                            }),
+                                            });
+                                          })()
+                                        : (0, $.jsx)(`span`, {
+                                            className: `font-mono text-slate-700 font-bold`,
+                                            children: e.freq || `10min/轮`,
                                           }),
-                                          t.subText &&
-                                            (0, $.jsx)(`span`, {
-                                              className: `text-[10px] text-slate-400 font-mono tracking-tight pl-0.5 leading-none`,
-                                              children: t.subText,
-                                            }),
-                                        ],
-                                      });
-                                    })(),
-                              }),
+                                    }),
                               !xe &&
                                 (0, $.jsx)(`td`, {
                                   className: `py-3 px-4 whitespace-nowrap`,
