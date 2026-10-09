@@ -46092,8 +46092,15 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
 
     let [svcName, setSvcName] = (0, C.useState)(r?.siteName || n.name || ``),
       [domain, setDomain] = (0, C.useState)(r?.domain || n.domain || `douyin.com`),
-      [proxyVendor, setProxyVendor] = (0, C.useState)(r?.vendor || `abuyun`),
-      [proxyChannel, setProxyChannel] = (0, C.useState)(r?.proxyKey || `动态高匿住宅IP池 (推荐)`),
+      [proxyVendor, setProxyVendor] = (0, C.useState)(() => {
+        let v = r?.vendor || `abuyun`;
+        return (typeof Mt !== 'undefined' && Mt[v]) ? v : `abuyun`;
+      }),
+      [proxyChannel, setProxyChannel] = (0, C.useState)(() => {
+        let v = r?.vendor || `abuyun`;
+        if (typeof Mt === 'undefined' || !Mt[v]) v = `abuyun`;
+        return typeof _t === 'function' ? _t(v, r?.proxyKey) : ((typeof Mt !== 'undefined' && Mt[v]?.channels?.[0]?.alias) || (typeof ht !== 'undefined' && ht[v]?.[0]) || `境内自增长-极速隧道`);
+      }),
       [workerConcurrency, setWorkerConcurrency] = (0, C.useState)(r?.concurrency || 8),
       [logTimeoutMinutes, setLogTimeoutMinutes] = (0, C.useState)(r?.logTimeout || 30),
       [nodeServer, setNodeServer] = (0, C.useState)(r?.nodeServer || n.nodeServer || `node-bj-01`),
@@ -46134,18 +46141,17 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
           { freq: 15, freqText: `15m/轮`, concurrency: 6, name: `常态增量轮询`, kwCount: 3, todayHits: 6400, status: `normal` },
           { freq: 30, freqText: `30m/轮`, concurrency: 4, name: `低频兜底观察`, kwCount: 2, todayHits: 2100, status: `normal` },
         ];
-      }),
-      [showAddFreq, setShowAddFreq] = (0, C.useState)(!1),
-      [newFreqMinutes, setNewFreqMinutes] = (0, C.useState)(5),
-      [newFreqConcurrency, setNewFreqConcurrency] = (0, C.useState)(8),
-      [newFreqName, setNewFreqName] = (0, C.useState)(``);
+      });
 
     (0, C.useEffect)(() => {
       if (n) {
         setSvcName(r?.siteName || n.name || ``);
         setDomain(r?.domain || n.domain || `douyin.com`);
-        setProxyVendor(r?.vendor || `abuyun`);
-        setProxyChannel(r?.proxyKey || `动态高匿住宅IP池 (推荐)`);
+        let curV = r?.vendor || `abuyun`;
+        if (typeof Mt === 'undefined' || !Mt[curV]) curV = `abuyun`;
+        setProxyVendor(curV);
+        let curCh = typeof _t === 'function' ? _t(curV, r?.proxyKey) : ((typeof Mt !== 'undefined' && Mt[curV]?.channels?.[0]?.alias) || (typeof ht !== 'undefined' && ht[curV]?.[0]) || `境内自增长-极速隧道`);
+        setProxyChannel(curCh);
         setWorkerConcurrency(r?.concurrency || 8);
         setLogTimeoutMinutes(r?.logTimeout || 30);
         setNodeServer(r?.nodeServer || n.nodeServer || `node-bj-01`);
@@ -46179,30 +46185,6 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
       );
     };
 
-    let handleAddFrequency = () => {
-      let m = Number(newFreqMinutes);
-      if (!m || m <= 0) return;
-      if (ft.some((x) => x.freq === m)) {
-        if (l) l(`该频率（${m}m/轮）已存在，无需重复添加！`, `error`);
-        return;
-      }
-      let cVal = Number(newFreqConcurrency) || (m <= 3 ? 16 : m <= 5 ? 12 : m <= 10 ? 8 : m <= 15 ? 6 : 4);
-      let newEntry = {
-        freq: m,
-        freqText: `${m}m/轮`,
-        concurrency: cVal,
-        name: newFreqName.trim() || `${m}分钟定时轮询`,
-        kwCount: 1,
-        todayHits: 0,
-        status: `normal`,
-      };
-      pt((prev) => [...prev, newEntry].sort((a, b) => a.freq - b.freq));
-      setShowAddFreq(!1);
-      setNewFreqName(``);
-      setNewFreqConcurrency(8);
-      if (l) l(`已成功为当前节点添加【${m}m/轮】采集频率（${cVal}并发线程）！`, `success`);
-    };
-
     let handleSaveAll = () => {
       let ipsArray = nodeIpsText
         .split(/[,，]/)
@@ -46214,7 +46196,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         name: svcName,
         domain: domain,
         vendor: proxyVendor,
-        proxyKey: proxyChannel,
+        proxyKey: typeof _t === 'function' ? _t(proxyVendor, proxyChannel) : proxyChannel,
         concurrency: ft.length > 0 ? (ft[0].concurrency || 8) : 8,
         logTimeout: Number(logTimeoutMinutes),
         nodeServer: nodeServer,
@@ -46328,81 +46310,124 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                 ],
               }),
 
-              /* 2. 代理网络通道与日志超时 (并发线程数移至各采集频率独立设置) */
+              /* 2. 代理网络通道与日志超时 (供应商与通道别名完全联动代理应用情况与供应商矩阵) */
               (0, $.jsxs)(`div`, {
-                className: `grid grid-cols-1 sm:grid-cols-3 gap-4`,
+                className: `space-y-2.5`,
                 children: [
                   (0, $.jsxs)(`div`, {
-                    className: `flex flex-col gap-1.5`,
-                    children: [
-                      (0, $.jsx)(`label`, {
-                        className: `text-[12.5px] font-semibold text-slate-700`,
-                        children: `代理供应商`,
-                      }),
-                      (0, $.jsxs)(`select`, {
-                        value: proxyVendor,
-                        onChange: (e) => setProxyVendor(e.target.value),
-                        className: `h-9.5 px-3 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 bg-white focus:border-[#0066FF] focus:ring-2 focus:ring-[#0066FF]/12 transition-all outline-none cursor-pointer`,
-                        children: [
-                          (0, $.jsx)(`option`, { value: `abuyun`, children: `雅闻 (高并发)` }),
-                          (0, $.jsx)(`option`, { value: `kuai`, children: `青果 (独享专线)` }),
-                          (0, $.jsx)(`option`, { value: `zhima`, children: `爬呀爬 (住宅IP)` }),
-                          (0, $.jsx)(`option`, { value: `kuaidaili`, children: `快代理 (BGP隧道)` }),
-                        ],
-                      }),
-                    ],
-                  }),
-                  (0, $.jsxs)(`div`, {
-                    className: `flex flex-col gap-1.5`,
-                    children: [
-                      (0, $.jsx)(`label`, {
-                        className: `text-[12.5px] font-semibold text-slate-700`,
-                        children: `通道别名`,
-                      }),
-                      (0, $.jsxs)(`select`, {
-                        value: proxyChannel,
-                        onChange: (e) => setProxyChannel(e.target.value),
-                        className: `h-9.5 px-3 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 bg-white focus:border-[#0066FF] focus:ring-2 focus:ring-[#0066FF]/12 transition-all outline-none cursor-pointer`,
-                        children: [
-                          (0, $.jsx)(`option`, { value: `动态高匿住宅IP池 (推荐)`, children: `动态高匿住宅IP池 (推荐)` }),
-                          (0, $.jsx)(`option`, { value: `独享数据中心专线`, children: `独享数据中心专线` }),
-                          (0, $.jsx)(`option`, { value: `BGP静态IP隧道`, children: `BGP静态IP隧道` }),
-                          (0, $.jsx)(`option`, { value: `移动基站4G/5G出口`, children: `移动基站4G/5G出口` }),
-                        ],
-                      }),
-                    ],
-                  }),
-                  (0, $.jsxs)(`div`, {
-                    className: `flex flex-col gap-1.5`,
+                    className: `grid grid-cols-1 sm:grid-cols-3 gap-4`,
                     children: [
                       (0, $.jsxs)(`div`, {
-                        className: `flex items-center justify-between`,
+                        className: `flex flex-col gap-1.5`,
                         children: [
                           (0, $.jsx)(`label`, {
                             className: `text-[12.5px] font-semibold text-slate-700`,
-                            children: `日志超时`,
+                            children: `代理供应商`,
                           }),
-                          (0, $.jsx)(`span`, {
-                            className: `text-[11px] text-slate-400`,
-                            children: `无日志判定异常`,
+                          (0, $.jsxs)(`select`, {
+                            value: proxyVendor,
+                            onChange: (e) => {
+                              let nextVendor = e.target.value;
+                              setProxyVendor(nextVendor);
+                              let chs = (typeof Mt !== 'undefined' && Mt[nextVendor]?.channels) || [];
+                              let nextAlias = chs[0]?.alias || (typeof ht !== 'undefined' && ht[nextVendor]?.[0]) || `境内自增长-极速隧道`;
+                              setProxyChannel(nextAlias);
+                            },
+                            className: `h-9.5 px-3 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 bg-white focus:border-[#0066FF] focus:ring-2 focus:ring-[#0066FF]/12 transition-all outline-none cursor-pointer`,
+                            children: [
+                              (0, $.jsx)(`option`, { value: `abuyun`, children: `雅闻 (Abuyun · 动态极速隧道)` }),
+                              (0, $.jsx)(`option`, { value: `kuai`, children: `青果 (Qingguo · 独享长效专线)` }),
+                              (0, $.jsx)(`option`, { value: `zhima`, children: `爬呀爬 (Paapa · 城市住宅IP池)` }),
+                            ],
                           }),
                         ],
                       }),
                       (0, $.jsxs)(`div`, {
-                        className: `relative flex items-center`,
+                        className: `flex flex-col gap-1.5`,
                         children: [
-                          (0, $.jsx)(`input`, {
-                            type: `number`,
-                            min: 5,
-                            max: 120,
-                            value: logTimeoutMinutes,
-                            onChange: (e) => setLogTimeoutMinutes(Number(e.target.value)),
-                            className: `w-full h-9.5 pl-3 pr-10 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 bg-white focus:border-[#0066FF] focus:ring-2 focus:ring-[#0066FF]/12 transition-all outline-none`,
+                          (0, $.jsx)(`label`, {
+                            className: `text-[12.5px] font-semibold text-slate-700`,
+                            children: `通道别名`,
                           }),
+                          (0, $.jsx)(`select`, {
+                            value: typeof _t === 'function' ? _t(proxyVendor, proxyChannel) : proxyChannel,
+                            onChange: (e) => setProxyChannel(e.target.value),
+                            className: `h-9.5 px-3 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 bg-white focus:border-[#0066FF] focus:ring-2 focus:ring-[#0066FF]/12 transition-all outline-none cursor-pointer`,
+                            children: ((typeof Mt !== 'undefined' && Mt[proxyVendor]?.channels) || (typeof ht !== 'undefined' && ht[proxyVendor]?.map((a) => ({ id: ``, alias: a, latency: `20 ms` }))) || []).map((ch) =>
+                              (0, $.jsx)(
+                                `option`,
+                                {
+                                  value: ch.alias,
+                                  children: ch.id ? `${ch.alias} (${ch.id} · ${ch.latency || `20 ms`})` : ch.alias,
+                                },
+                                ch.id || ch.alias,
+                              ),
+                            ),
+                          }),
+                        ],
+                      }),
+                      (0, $.jsxs)(`div`, {
+                        className: `flex flex-col gap-1.5`,
+                        children: [
+                          (0, $.jsxs)(`div`, {
+                            className: `flex items-center justify-between`,
+                            children: [
+                              (0, $.jsx)(`label`, {
+                                className: `text-[12.5px] font-semibold text-slate-700`,
+                                children: `日志超时`,
+                              }),
+                              (0, $.jsx)(`span`, {
+                                className: `text-[11px] text-slate-400`,
+                                children: `无日志判定异常`,
+                              }),
+                            ],
+                          }),
+                          (0, $.jsxs)(`div`, {
+                            className: `relative flex items-center`,
+                            children: [
+                              (0, $.jsx)(`input`, {
+                                type: `number`,
+                                min: 5,
+                                max: 120,
+                                value: logTimeoutMinutes,
+                                onChange: (e) => setLogTimeoutMinutes(Number(e.target.value)),
+                                className: `w-full h-9.5 pl-3 pr-10 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 bg-white focus:border-[#0066FF] focus:ring-2 focus:ring-[#0066FF]/12 transition-all outline-none`,
+                              }),
+                              (0, $.jsx)(`span`, {
+                                className: `absolute right-3 text-xs text-slate-400 font-medium pointer-events-none`,
+                                children: `分钟`,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  (0, $.jsxs)(`div`, {
+                    className: `px-3 py-1.5 rounded-lg bg-blue-50/60 border border-blue-200/70 text-[11px] text-slate-700 flex items-center justify-between font-sans`,
+                    children: [
+                      (0, $.jsxs)(`div`, {
+                        className: `flex items-center gap-1.5`,
+                        children: [
                           (0, $.jsx)(`span`, {
-                            className: `absolute right-3 text-xs text-slate-400 font-medium pointer-events-none`,
-                            children: `分钟`,
+                            className: `px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#0066FF] text-white`,
+                            children: `矩阵联动`,
                           }),
+                          (0, $.jsxs)(`span`, {
+                            children: [
+                              `已绑定【`,
+                              (0, $.jsx)(`strong`, { className: `text-slate-900 font-bold`, children: (typeof Mt !== 'undefined' && Mt[proxyVendor]?.name) || proxyVendor }),
+                              `】通道: `,
+                              (0, $.jsx)(`span`, { className: `text-[#0066FF] font-bold font-mono`, children: typeof _t === 'function' ? _t(proxyVendor, proxyChannel) : proxyChannel }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      (0, $.jsxs)(`div`, {
+                        className: `flex items-center gap-1.5 text-emerald-600 font-semibold text-[11px]`,
+                        children: [
+                          (0, $.jsx)(`span`, { className: `w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse` }),
+                          (0, $.jsx)(`span`, { children: `链路可用 99.8%` }),
                         ],
                       }),
                     ],
@@ -46475,7 +46500,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                 ],
               }),
 
-              /* 4. 当前服务节点已配置采集频率列表 (保留!) */
+              /* 4. 当前服务节点已配置采集频率列表 (删除新增频率，保留各频率并发独立设置) */
               (0, $.jsxs)(`div`, {
                 className: `space-y-2.5 pt-1 border-t border-slate-200`,
                 children: [
@@ -46495,90 +46520,15 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                           }),
                         ],
                       }),
-                      (0, $.jsxs)(`div`, {
+                      (0, $.jsx)(`div`, {
                         className: `flex items-center gap-2`,
-                        children: [
-                          (0, $.jsx)(`span`, {
-                            className: `text-[11px] text-slate-400 hidden sm:inline`,
-                            children: `对应主列表【采集频率】展开展示 · 各采集频率分别设置并发线程数`,
-                          }),
-                          (0, $.jsxs)(`button`, {
-                            type: `button`,
-                            onClick: () => setShowAddFreq(!showAddFreq),
-                            className: `px-2.5 py-1 rounded-lg border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer shadow-2xs`,
-                            children: [
-                              (0, $.jsx)(`span`, { children: `+` }),
-                              (0, $.jsx)(`span`, { children: showAddFreq ? `收起新增` : `新增频率` }),
-                            ],
-                          }),
-                        ],
+                        children: (0, $.jsx)(`span`, {
+                          className: `text-[11px] text-slate-400 hidden sm:inline`,
+                          children: `对应主列表【采集频率】展开展示 · 各采集频率分别设置并发线程数`,
+                        }),
                       }),
                     ],
                   }),
-
-                  /* Optional Add Frequency Form */
-                  showAddFreq &&
-                    (0, $.jsxs)(`div`, {
-                      className: `p-3 rounded-xl border border-rose-200 bg-rose-50/50 flex flex-wrap items-center gap-2.5 animate-in fade-in duration-150`,
-                      children: [
-                        (0, $.jsxs)(`div`, {
-                          className: `flex items-center gap-1.5`,
-                          children: [
-                            (0, $.jsx)(`span`, {
-                              className: `text-[11px] font-bold text-slate-700`,
-                              children: `周期(分钟):`,
-                            }),
-                            (0, $.jsx)(`input`, {
-                              type: `number`,
-                              min: 1,
-                              max: 1440,
-                              value: newFreqMinutes,
-                              onChange: (e) => setNewFreqMinutes(Number(e.target.value)),
-                              className: `w-18 h-7.5 px-2 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 bg-white outline-none`,
-                            }),
-                          ],
-                        }),
-                        (0, $.jsxs)(`div`, {
-                          className: `flex items-center gap-1.5`,
-                          children: [
-                            (0, $.jsx)(`span`, {
-                              className: `text-[11px] font-bold text-slate-700`,
-                              children: `并发线程:`,
-                            }),
-                            (0, $.jsx)(`input`, {
-                              type: `number`,
-                              min: 1,
-                              max: 64,
-                              value: newFreqConcurrency,
-                              onChange: (e) => setNewFreqConcurrency(Number(e.target.value)),
-                              className: `w-16 h-7.5 px-2 border border-slate-300 rounded-lg text-xs font-mono font-bold text-blue-700 bg-white outline-none`,
-                            }),
-                          ],
-                        }),
-                        (0, $.jsxs)(`div`, {
-                          className: `flex items-center gap-1.5 flex-1 min-w-[140px]`,
-                          children: [
-                            (0, $.jsx)(`span`, {
-                              className: `text-[11px] font-bold text-slate-700`,
-                              children: `别名:`,
-                            }),
-                            (0, $.jsx)(`input`, {
-                              type: `text`,
-                              value: newFreqName,
-                              onChange: (e) => setNewFreqName(e.target.value),
-                              placeholder: `如: 核心热榜突发`,
-                              className: `w-full h-7.5 px-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-800 bg-white outline-none`,
-                            }),
-                          ],
-                        }),
-                        (0, $.jsx)(`button`, {
-                          type: `button`,
-                          onClick: handleAddFrequency,
-                          className: `h-7.5 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors cursor-pointer shadow-2xs`,
-                          children: `确认添加`,
-                        }),
-                      ],
-                    }),
 
                   /* Frequency Table */
                   (0, $.jsx)(`div`, {
