@@ -56650,13 +56650,16 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
   KeywordLogModal = ({ isOpen: e, service: t, onClose: n }) => {
     if (!e || !t) return null;
     let [r, i] = (0, C.useState)(`table`),
-      [a, o] = (0, C.useState)(t.keyword || `ALL`),
+      [kwInputText, setKwInputText] = (0, C.useState)(t.keyword && t.keyword !== `ALL` ? t.keyword : ``),
+      [showKwDropdown, setShowKwDropdown] = (0, C.useState)(!1),
+      [selectedFreq, setSelectedFreq] = (0, C.useState)(`ALL`),
       [s, c] = (0, C.useState)(`ALL`),
       [l, u] = (0, C.useState)(``),
       [d, f] = (0, C.useState)(!0),
       [p, m] = (0, C.useState)([]);
 
-    let kwTarget = t.keyword || ``, isServiceLog = !t.keyword || Boolean(t.isServiceLog),
+    let kwTarget = t.keyword || ``,
+      isServiceLog = !t.keyword || Boolean(t.isServiceLog),
       platTitle = t.platformName || (t.name ? t.name.split(`·`)[0].replace(`-关键词轮询`, ``).trim() : `抖音综合搜索`);
     if (platTitle.includes(`抖音`) && !platTitle.includes(`搜索`)) platTitle = `抖音搜索`;
     let domainStr = platTitle.includes(`抖音`)
@@ -56670,6 +56673,16 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
             : platTitle.includes(`小红书`)
               ? `xiaohongshu.com`
               : t.domain || `douyin.com`;
+
+    let svcPresets = (t.frequencies && Array.isArray(t.frequencies) && t.frequencies.length > 0)
+      ? t.frequencies
+      : [
+          { freq: 3, freqText: `3m/轮` },
+          { freq: 5, freqText: `5m/轮` },
+          { freq: 10, freqText: `10m/轮` },
+          { freq: 15, freqText: `15m/轮` },
+          { freq: 30, freqText: `30m/轮` },
+        ];
 
     (0, C.useEffect)(() => {
       let pool = kwTarget
@@ -56692,6 +56705,9 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         initList = [];
       for (let idx = 0; idx < 24; idx++) {
         let kwItem = pool[idx % pool.length],
+          freqObj = svcPresets[idx % svcPresets.length],
+          freqVal = freqObj.freq || 5,
+          freqTxt = freqObj.freqText || `${freqVal}m/轮`,
           secOffset = idx * 42 + Math.floor(Math.random() * 20),
           tCol = new Date(now.getTime() - secOffset * 1e3).toISOString().replace(`T`, ` `).substring(0, 19),
           tInb = new Date(now.getTime() - (secOffset - 1) * 1e3).toISOString().replace(`T`, ` `).substring(0, 19),
@@ -56701,7 +56717,6 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
           inb = isDup ? 0 : hit - (3 + Math.floor(Math.random() * 5)),
           dup = isDup ? hit : hit - inb,
           lat = `${210 + Math.floor(Math.random() * 110)}ms`,
-          cat = kwItem.includes(`南京`) ? `城市热点` : kwItem.includes(`机器人`) || kwItem.includes(`模型`) || kwItem.includes(`芯片`) ? `前沿科技` : `宏观产业`,
           searchUrl = `https://www.${domainStr}/search/${encodeURIComponent(kwItem)}?sort_type=latest`,
           apiStr = `GET /api/v2/search/general?keyword=${encodeURIComponent(kwItem)}&sort=latest`,
           proxyStr = `华东-上海高匿住宅代理 [218.75.12.${80 + (idx % 20)}:9020]`,
@@ -56715,7 +56730,8 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         initList.push({
           id: `KW-LOG-${1e3 + idx}`,
           keyword: kwItem,
-          category: cat,
+          freq: freqVal,
+          freqText: freqTxt,
           platformName: platTitle,
           domain: domainStr,
           searchUrl: searchUrl,
@@ -56742,6 +56758,9 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
       let timer = setInterval(() => {
         let nowStr = new Date().toISOString().replace(`T`, ` `).substring(0, 19),
           kwItem = kwTarget || (Math.random() > 0.4 ? `南京` : `具身智能人形机器人`),
+          liveFreqObj = svcPresets[Math.floor(Math.random() * svcPresets.length)],
+          liveFreqVal = liveFreqObj.freq || 5,
+          liveFreqTxt = liveFreqObj.freqText || `${liveFreqVal}m/轮`,
           hit = 110 + Math.floor(Math.random() * 45),
           dup = 2 + Math.floor(Math.random() * 4),
           inb = hit - dup;
@@ -56749,7 +56768,8 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
           {
             id: `KW-LOG-${Date.now().toString().slice(-5)}`,
             keyword: kwItem,
-            category: kwItem.includes(`南京`) ? `城市热点` : `前沿科技`,
+            freq: liveFreqVal,
+            freqText: liveFreqTxt,
             platformName: platTitle,
             domain: domainStr,
             searchUrl: `https://www.${domainStr}/search/${encodeURIComponent(kwItem)}?sort_type=latest`,
@@ -56759,22 +56779,26 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
             hitCount: hit,
             inboundCount: inb,
             duplicateCount: dup,
-            latency: `${215 + Math.floor(Math.random() * 95)}ms`,
+            latency: `${200 + Math.floor(Math.random() * 80)}ms`,
             statusCode: 200,
             status: `success`,
-            latestPublishTime: new Date(Date.now() - 240000).toISOString().replace(`T`, ` `).substring(0, 19),
-            latestPublishRelative: `4分钟前`,
-            proxyIp: `华东-上海高匿住宅代理 [218.75.12.${80 + Math.floor(Math.random() * 20)}:9020]`,
-            summary: `【实时搜索命中】在【${platTitle}】输入关键词【${kwItem}】执行抓取，获取短视频及图文 ${hit} 条，成功入库 ${inb} 条并更新关键词索引`,
+            latestPublishTime: nowStr,
+            latestPublishRelative: `刚刚`,
+            proxyIp: `华东-上海高匿住宅代理 [218.75.12.98:9020]`,
+            summary: `在【${platTitle}】实时增量检索到最新社媒内容 ${hit} 条，有效清洗入库 ${inb} 条`,
           },
-          ...prev.slice(0, 39),
+          ...prev.slice(0, 49),
         ]);
-      }, 3400);
+      }, 4500);
       return () => clearInterval(timer);
     }, [d, kwTarget, platTitle, domainStr]);
 
     let filtered = p.filter((item) => {
-      if (a !== `ALL` && item.keyword !== a) return !1;
+      if (kwInputText.trim()) {
+        let q = kwInputText.trim().toLowerCase();
+        if (!item.keyword.toLowerCase().includes(q)) return !1;
+      }
+      if (selectedFreq !== `ALL` && (item.freqText || `${item.freq}m/轮`) !== selectedFreq) return !1;
       if (s !== `ALL` && item.status !== s) return !1;
       if (l.trim()) {
         let q = l.toLowerCase();
@@ -56788,6 +56812,10 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
       totalDup = p.reduce((acc, x) => acc + x.duplicateCount, 0);
 
     let kwOptions = Array.from(new Set(p.map((x) => x.keyword)));
+    let freqOptions = (t.frequencies && Array.isArray(t.frequencies) && t.frequencies.length > 0)
+      ? t.frequencies.map((x) => x.freqText || `${x.freq}m/轮`)
+      : Array.from(new Set(p.map((x) => x.freqText || `${x.freq}m/轮`)));
+    if (freqOptions.length === 0) freqOptions = [`3m/轮`, `5m/轮`, `10m/轮`, `15m/轮`, `30m/轮`];
 
     return (0, $.jsx)(`div`, {
       className: `fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4`,
@@ -56938,34 +56966,153 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                       (0, $.jsx)(`button`, {
                         type: `button`,
                         onClick: () => i(`table`),
-                        className: `px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${r === `table` ? `bg-white text-rose-600 shadow-2xs` : `text-slate-600 hover:text-slate-900`}`,
-                        children: `表格明细视图`,
+                        className: `px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${r === `table` ? `bg-white text-slate-800 shadow-2xs` : `text-slate-500 hover:text-slate-700`}`,
+                        children: `结构化表格`,
                       }),
                       (0, $.jsx)(`button`, {
                         type: `button`,
                         onClick: () => i(`console`),
-                        className: `px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${r === `console` ? `bg-white text-rose-600 shadow-2xs` : `text-slate-600 hover:text-slate-900`}`,
-                        children: `控制台Raw流`,
+                        className: `px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${r === `console` ? `bg-white text-slate-800 shadow-2xs` : `text-slate-500 hover:text-slate-700`}`,
+                        children: `终端日志流`,
                       }),
                     ],
                   }),
-                  /* Keyword dropdown filter (仅在服务列表全量日志看板中展示) */
+
+                  /* Keyword Combobox input with quick dropdown (仅在服务列表全量日志看板中展示) */
                   isServiceLog &&
                     (0, $.jsxs)(`div`, {
-                      className: `flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1`,
+                      className: `relative flex items-center`,
                       children: [
-                        (0, $.jsx)(`span`, { className: `text-slate-400 text-[11px]`, children: `关键词:` }),
-                        (0, $.jsxs)(`select`, {
-                        value: a,
-                        onChange: (e) => o(e.target.value),
+                        showKwDropdown &&
+                          (0, $.jsx)(`div`, {
+                            className: `fixed inset-0 z-30`,
+                            onClick: () => setShowKwDropdown(!1),
+                          }),
+                        (0, $.jsxs)(`div`, {
+                          className: `relative z-40 flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 focus-within:border-rose-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-rose-500/10 transition-all`,
+                          children: [
+                            (0, $.jsx)(`span`, {
+                              className: `text-slate-400 text-[11px] font-medium shrink-0`,
+                              children: `关键词:`,
+                            }),
+                            (0, $.jsx)(`input`, {
+                              type: `text`,
+                              value: kwInputText,
+                              onChange: (e) => {
+                                setKwInputText(e.target.value);
+                                setShowKwDropdown(!0);
+                              },
+                              onFocus: () => setShowKwDropdown(!0),
+                              placeholder: `输入关键词快速下拉匹配...`,
+                              className: `bg-transparent text-slate-800 text-xs font-bold focus:outline-hidden w-36 sm:w-44 placeholder-slate-400`,
+                            }),
+                            kwInputText &&
+                              (0, $.jsx)(`button`, {
+                                type: `button`,
+                                onClick: () => {
+                                  setKwInputText(``);
+                                  setShowKwDropdown(!1);
+                                },
+                                className: `text-slate-400 hover:text-slate-600 p-0.5 rounded cursor-pointer transition-colors text-[10px]`,
+                                title: `清空关键词条件`,
+                                children: `✕`,
+                              }),
+                            (0, $.jsx)(`button`, {
+                              type: `button`,
+                              onClick: () => setShowKwDropdown(!showKwDropdown),
+                              className: `text-slate-400 hover:text-slate-600 p-0.5 rounded cursor-pointer transition-colors`,
+                              children: (0, $.jsx)(`svg`, {
+                                className: `w-3 h-3 transition-transform ${showKwDropdown ? `rotate-180 text-rose-500` : ``}`,
+                                fill: `none`,
+                                viewBox: `0 0 24 24`,
+                                stroke: `currentColor`,
+                                strokeWidth: `2`,
+                                children: (0, $.jsx)(`path`, {
+                                  strokeLinecap: `round`,
+                                  strokeLinejoin: `round`,
+                                  d: `M19 9l-7 7-7-7`,
+                                }),
+                              }),
+                            }),
+                          ],
+                        }),
+                        /* Quick Dropdown Menu */
+                        showKwDropdown &&
+                          (0, $.jsxs)(`div`, {
+                            className: `absolute top-full left-0 mt-1 z-50 bg-white border border-slate-200 rounded-xl shadow-xl w-64 max-h-56 overflow-y-auto p-1 text-xs animate-in fade-in zoom-in-95 duration-100 divide-y divide-slate-100`,
+                            children: [
+                              (0, $.jsxs)(`div`, {
+                                onClick: () => {
+                                  setKwInputText(``);
+                                  setShowKwDropdown(!1);
+                                },
+                                className: `px-2.5 py-1.5 rounded-lg text-slate-600 hover:bg-slate-50 cursor-pointer flex items-center justify-between font-medium ${
+                                  !kwInputText ? `bg-rose-50 text-rose-700 font-bold` : ``
+                                }`,
+                                children: [
+                                  (0, $.jsx)(`span`, { children: `全部监控词 (不限)` }),
+                                  (0, $.jsxs)(`span`, {
+                                    className: `text-[10px] text-slate-400 font-mono`,
+                                    children: [kwOptions.length, ` 个`],
+                                  }),
+                                ],
+                              }),
+                              (() => {
+                                let matched = kwOptions.filter((k) =>
+                                  k.toLowerCase().includes(kwInputText.toLowerCase().trim()),
+                                );
+                                if (matched.length === 0) {
+                                  return (0, $.jsx)(`div`, {
+                                    className: `px-2.5 py-2.5 text-center text-slate-400 text-[11px]`,
+                                    children: `无完全匹配词，按输入内容过滤`,
+                                  });
+                                }
+                                return (0, $.jsx)(`div`, {
+                                  className: `py-0.5 space-y-0.5`,
+                                  children: matched.map((k) => {
+                                    let isSelected = kwInputText.trim() === k;
+                                    return (0, $.jsxs)(
+                                      `div`,
+                                      {
+                                        key: k,
+                                        onClick: () => {
+                                          setKwInputText(k);
+                                          setShowKwDropdown(!1);
+                                        },
+                                        className: `px-2.5 py-1.5 rounded-lg hover:bg-rose-50 hover:text-rose-700 cursor-pointer flex items-center justify-between text-slate-800 transition-colors ${
+                                          isSelected ? `bg-rose-50 text-rose-700 font-bold` : ``
+                                        }`,
+                                        children: [
+                                          (0, $.jsx)(`span`, { className: `truncate max-w-[185px]`, children: k }),
+                                          isSelected && (0, $.jsx)(`span`, { className: `text-rose-500 font-bold`, children: `✓` }),
+                                        ],
+                                      },
+                                    );
+                                  }),
+                                });
+                              })(),
+                            ],
+                          }),
+                      ],
+                    }),
+
+                  /* 采集频率筛选 (新增!) */
+                  (0, $.jsxs)(`div`, {
+                    className: `flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1`,
+                    children: [
+                      (0, $.jsx)(`span`, { className: `text-slate-400 text-[11px]`, children: `采集频率:` }),
+                      (0, $.jsxs)(`select`, {
+                        value: selectedFreq,
+                        onChange: (e) => setSelectedFreq(e.target.value),
                         className: `bg-transparent text-slate-800 text-xs font-bold focus:outline-hidden cursor-pointer`,
                         children: [
-                          (0, $.jsx)(`option`, { value: `ALL`, children: `全部监控词 (${kwOptions.length})` }),
-                          kwOptions.map((k) => (0, $.jsx)(`option`, { key: k, value: k, children: k })),
+                          (0, $.jsx)(`option`, { value: `ALL`, children: `全部频率` }),
+                          freqOptions.map((f) => (0, $.jsx)(`option`, { key: f, value: f, children: f })),
                         ],
                       }),
                     ],
                   }),
+
                   /* Status filter */
                   (0, $.jsxs)(`div`, {
                     className: `flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1`,
@@ -56984,6 +57131,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                       }),
                     ],
                   }),
+
                   /* Search input */
                   (0, $.jsx)(`input`, {
                     type: `text`,
@@ -56994,6 +57142,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                   }),
                 ],
               }),
+
               /* Right controls: Live switch */
               (0, $.jsxs)(`button`, {
                 type: `button`,
@@ -57006,6 +57155,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
               }),
             ],
           }),
+
           /* Main Content: Table or Console */
           (0, $.jsx)(`div`, {
             className: `flex-1 overflow-y-auto min-h-0 bg-white`,
@@ -57022,6 +57172,10 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                               className: `py-2.5 px-4 min-w-[140px] whitespace-nowrap`,
                               children: `关键词`,
                             }),
+                          (0, $.jsx)(`th`, {
+                            className: `py-2.5 px-3 min-w-[100px] whitespace-nowrap text-center`,
+                            children: `采集频率`,
+                          }),
                           (0, $.jsx)(`th`, {
                             className: `py-2.5 px-3 min-w-[155px] whitespace-nowrap`,
                             children: `采集时间`,
@@ -57050,7 +57204,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                       children: filtered.length === 0
                         ? (0, $.jsx)(`tr`, {
                             children: (0, $.jsx)(`td`, {
-                              colSpan: isServiceLog ? 6 : 5,
+                              colSpan: isServiceLog ? 7 : 6,
                               className: `py-12 text-center text-slate-400`,
                               children: `未匹配到符合条件的关键词轮询日志`,
                             }),
@@ -57063,21 +57217,43 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                 isServiceLog &&
                                   (0, $.jsx)(`td`, {
                                     className: `py-3 px-4 whitespace-nowrap`,
-                                    children: (0, $.jsxs)(`div`, {
-                                      className: `flex items-center gap-1.5`,
-                                      children: [
-                                        (0, $.jsx)(`span`, {
-                                          className: `font-bold text-slate-900 text-xs bg-rose-50 text-rose-800 px-2 py-0.5 rounded-md border border-rose-200/80 shadow-2xs`,
-                                          children: item.keyword,
-                                        }),
-                                        item.category &&
-                                          (0, $.jsx)(`span`, {
-                                            className: `text-[10px] text-slate-500 bg-slate-100 px-1 py-0.2 rounded border border-slate-200`,
-                                            children: item.category,
-                                          }),
-                                      ],
+                                    children: (0, $.jsx)(`span`, {
+                                      className: `font-bold text-slate-900 text-xs bg-rose-50 text-rose-800 px-2.5 py-1 rounded-md border border-rose-200/80 shadow-2xs`,
+                                      children: item.keyword,
                                     }),
                                   }),
+                                (0, $.jsx)(`td`, {
+                                  className: `py-3 px-3 whitespace-nowrap text-center`,
+                                  children: (0, $.jsxs)(`span`, {
+                                    className: `inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-[11px] font-bold border ${
+                                      (item.freq || 5) <= 3
+                                        ? `bg-rose-50 text-rose-700 border-rose-200`
+                                        : (item.freq || 5) <= 5
+                                          ? `bg-orange-50 text-orange-700 border-orange-200`
+                                          : (item.freq || 5) <= 10
+                                            ? `bg-blue-50 text-blue-700 border-blue-200`
+                                            : (item.freq || 5) <= 15
+                                              ? `bg-emerald-50 text-emerald-700 border-emerald-200`
+                                              : `bg-slate-50 text-slate-700 border-slate-200`
+                                    }`,
+                                    children: [
+                                      (0, $.jsx)(`span`, {
+                                        className: `w-1.5 h-1.5 rounded-full ${
+                                          (item.freq || 5) <= 3
+                                            ? `bg-rose-500`
+                                            : (item.freq || 5) <= 5
+                                              ? `bg-orange-500`
+                                              : (item.freq || 5) <= 10
+                                                ? `bg-blue-500`
+                                                : (item.freq || 5) <= 15
+                                                  ? `bg-emerald-500`
+                                                  : `bg-slate-400`
+                                        }`,
+                                      }),
+                                      item.freqText || `${item.freq || 5}m/轮`,
+                                    ],
+                                  }),
+                                }),
                                 (0, $.jsx)(`td`, {
                                   className: `py-3 px-3 whitespace-nowrap`,
                                   children: (0, $.jsxs)(`div`, {
@@ -57217,6 +57393,8 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                             (0, $.jsx)(`span`, { className: `text-rose-400 font-bold`, children: `[KW-SEARCH]` }),
                             (0, $.jsxs)(`span`, { className: `text-amber-300 font-bold`, children: [`目标平台: `, item.platformName] }),
                             (0, $.jsx)(`span`, { className: `text-slate-600`, children: `|` }),
+                            (0, $.jsxs)(`span`, { className: `text-cyan-400 font-bold`, children: [`频率: `, item.freqText || `${item.freq || 5}m/轮`] }),
+                            (0, $.jsx)(`span`, { className: `text-slate-600`, children: `|` }),
                             (0, $.jsxs)(`span`, { className: `text-white font-black`, children: [`关键词: 【`, item.keyword, `】`] }),
                           ],
                         }),
@@ -57274,7 +57452,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         ],
       }),
     });
-  },
+  };
 
   Ln = ({ isOpen: e, service: t, onClose: n }) => {
     if (!e || !t) return null;
