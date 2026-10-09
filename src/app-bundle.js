@@ -47666,7 +47666,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                                 type: `button`,
                                                 onClick: () => handleOpenKeywordLog(kw),
                                                 className: `p-1.5 rounded-lg bg-white hover:bg-purple-50 border border-slate-200 text-slate-500 hover:text-purple-600 transition-colors cursor-pointer shadow-2xs`,
-                                                title: `查看【${kw.keyword}】在【${pMeta.name}】的轮询采集日志`,
+                                                title: `采集日志`,
                                                 children: (0, $.jsxs)(`svg`, {
                                                   className: `w-3 h-3`,
                                                   fill: `none`,
@@ -47758,6 +47758,11 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                             className: `py-3 px-3 min-w-[185px] whitespace-nowrap`,
                             children: `采集数据最新发布时间`,
                           }),
+                          /* Column: 入库时间 */
+                          (0, $.jsx)(`th`, {
+                            className: `py-3 px-3 min-w-[155px] whitespace-nowrap`,
+                            children: `入库时间`,
+                          }),
                           /* Column 5: 采集情况 */
                           (0, $.jsxs)(`th`, {
                             className: `py-3 px-4 min-w-[155px] text-right cursor-pointer hover:text-rose-600 transition-colors`,
@@ -47778,7 +47783,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                             children: `状态`,
                           }),
                           (0, $.jsx)(`th`, {
-                            className: `py-3 px-4 w-[160px] text-center`,
+                            className: `py-3 px-4 min-w-[210px] text-center`,
                             children: `快捷操作`,
                           }),
                         ],
@@ -47790,7 +47795,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                         filteredKeywords.length === 0
                           ? (0, $.jsx)(`tr`, {
                               children: (0, $.jsx)(`td`, {
-                                colSpan: 7,
+                                colSpan: 8,
                                 className: `py-12 text-center text-slate-400`,
                                 children: (0, $.jsxs)(`div`, {
                                   className: `flex flex-col items-center gap-2`,
@@ -47847,6 +47852,31 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                                       className: `text-purple-600 font-semibold bg-purple-50 px-1 py-0.2 rounded border border-purple-200/60`,
                                                       children: item.latestDataRelativeText || `5分钟前`,
                                                     }),
+                                                  ],
+                                                }),
+                                              ],
+                                            }),
+                                          }),
+                                          /* Column: 入库时间 */
+                                          (0, $.jsx)(`td`, {
+                                            className: `py-3.5 px-3 whitespace-nowrap`,
+                                            children: (0, $.jsxs)(`div`, {
+                                              className: `flex flex-col gap-0.5`,
+                                              children: [
+                                                (0, $.jsx)(`span`, {
+                                                  className: `font-mono text-[12px] font-bold text-slate-800 leading-tight`,
+                                                  children: item.inboundTime || item.latestInboundTime || (() => {
+                                                    let dt = item.latestDataTime || item.latestPublishTime || `2026-09-30 08:35:10`;
+                                                    let d = new Date(dt.replace(` `, `T`));
+                                                    if (isNaN(d.getTime())) d = new Date(`2026-09-30T08:35:10`);
+                                                    return new Date(d.getTime() + 15000).toISOString().replace(`T`, ` `).substring(0, 19);
+                                                  })(),
+                                                }),
+                                                (0, $.jsxs)(`div`, {
+                                                  className: `flex items-center gap-1 font-mono text-[10px] text-emerald-600 font-semibold`,
+                                                  children: [
+                                                    (0, $.jsx)(`span`, { className: `w-1.5 h-1.5 rounded-full bg-emerald-500` }),
+                                                    `已完成入库`,
                                                   ],
                                                 }),
                                               ],
@@ -47920,25 +47950,26 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                                     ? (0, $.jsx)(`span`, { className: `text-xs font-bold text-emerald-600`, children: `▶` })
                                                     : (0, $.jsx)(`span`, { className: `text-xs font-bold text-amber-600`, children: `⏸` }),
                                                 }),
-                                                (0, $.jsx)(`button`, {
+                                                (0, $.jsxs)(`button`, {
                                                   type: `button`,
                                                   onClick: () => handleOpenKeywordLog(item),
-                                                  className: `p-1.5 rounded-lg bg-slate-50 hover:bg-purple-50 text-slate-500 hover:text-purple-600 border border-slate-200 hover:border-purple-200 transition-colors cursor-pointer shadow-2xs`,
-                                                  title: `查看【${item.keyword}】在【${pMeta.name}】的轮询采集日志`,
-                                                  children: (0, $.jsxs)(`svg`, {
-                                                    className: `w-3.5 h-3.5`,
-                                                    fill: `none`,
-                                                    viewBox: `0 0 24 24`,
-                                                    stroke: `currentColor`,
-                                                    strokeWidth: 2,
-                                                    children: [
-                                                      (0, $.jsx)(`path`, {
+                                                  className: `px-2 py-1 rounded-lg bg-slate-50 hover:bg-purple-50 text-slate-600 hover:text-purple-600 border border-slate-200 hover:border-purple-200 transition-colors cursor-pointer shadow-2xs flex items-center gap-1 text-[11px] font-bold`,
+                                                  title: `采集日志`,
+                                                  children: [
+                                                    (0, $.jsx)(`svg`, {
+                                                      className: `w-3 h-3 text-purple-600 shrink-0`,
+                                                      fill: `none`,
+                                                      viewBox: `0 0 24 24`,
+                                                      stroke: `currentColor`,
+                                                      strokeWidth: 2,
+                                                      children: (0, $.jsx)(`path`, {
                                                         strokeLinecap: `round`,
                                                         strokeLinejoin: `round`,
                                                         d: `M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z`,
                                                       }),
-                                                    ],
-                                                  }),
+                                                    }),
+                                                    (0, $.jsx)(`span`, { children: `采集日志` }),
+                                                  ],
                                                 }),
                                                 (0, $.jsx)(`button`, {
                                                   type: `button`,
@@ -47968,7 +47999,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                         {
                                           className: `bg-rose-50/30 border-b border-rose-100`,
                                           children: (0, $.jsx)(`td`, {
-                                            colSpan: 7,
+                                            colSpan: 8,
                                             className: `p-4`,
                                             children: (0, $.jsxs)(`div`, {
                                               className: `bg-white rounded-xl border border-rose-200 p-4 shadow-2xs flex flex-col gap-3`,
@@ -57038,6 +57069,10 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                             children: `采集时间`,
                           }),
                           (0, $.jsx)(`th`, {
+                            className: `py-2.5 px-3 min-w-[155px] whitespace-nowrap`,
+                            children: `入库时间`,
+                          }),
+                          (0, $.jsx)(`th`, {
                             className: `py-2.5 px-3 min-w-[165px] whitespace-nowrap`,
                             children: `数据最新发布时间`,
                           }),
@@ -57057,7 +57092,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                       children: filtered.length === 0
                         ? (0, $.jsx)(`tr`, {
                             children: (0, $.jsx)(`td`, {
-                              colSpan: isServiceLog ? 5 : 4,
+                              colSpan: isServiceLog ? 6 : 5,
                               className: `py-12 text-center text-slate-400`,
                               children: `未匹配到符合条件的关键词轮询日志`,
                             }),
@@ -57103,6 +57138,22 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                             children: item.latency || `220ms`,
                                           }),
                                         ],
+                                      }),
+                                    ],
+                                  }),
+                                }),
+                                (0, $.jsx)(`td`, {
+                                  className: `py-3 px-3 whitespace-nowrap`,
+                                  children: (0, $.jsxs)(`div`, {
+                                    className: `flex flex-col gap-0.5`,
+                                    children: [
+                                      (0, $.jsx)(`span`, {
+                                        className: `font-mono text-xs font-bold text-slate-800 leading-tight`,
+                                        children: item.inboundTime || item.collectTime,
+                                      }),
+                                      (0, $.jsx)(`span`, {
+                                        className: `font-mono text-[10px] text-emerald-600 font-semibold`,
+                                        children: `+1s 校验入库`,
                                       }),
                                     ],
                                   }),
