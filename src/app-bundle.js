@@ -57402,7 +57402,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
         ],
       }),
     });
-  };
+  },
 
   Ln = ({ isOpen: e, service: t, onClose: n }) => {
     if (!e || !t) return null;
