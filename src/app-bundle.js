@@ -56884,84 +56884,52 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
               }),
             ],
           }),
-          /* KPI Summary Cards */
+          /* 公共信息栏 (平台统一入口与基础信息) */
           (0, $.jsxs)(`div`, {
-            className: `px-6 py-3 bg-slate-50/80 border-b border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs shrink-0`,
+            className: `px-6 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4 flex-wrap text-xs shrink-0`,
             children: [
               (0, $.jsxs)(`div`, {
-                className: `bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col justify-between`,
+                className: `flex items-center gap-3.5 flex-wrap`,
                 children: [
-                  (0, $.jsx)(`div`, {
-                    className: `text-[11px] text-slate-500 font-medium`,
-                    children: isServiceLog ? `服务监控关键词矩阵` : `当前监控/检索词`,
-                  }),
                   (0, $.jsxs)(`div`, {
-                    className: `text-sm font-extrabold text-rose-700 truncate mt-1 flex items-center gap-1`,
+                    className: `flex items-center gap-1.5`,
                     children: [
-                      isServiceLog ? `多词矩阵轮询 (共${kwOptions.length}词)` : `【${kwTarget}】`,
+                      (0, $.jsx)(`span`, { className: `text-[11px] text-slate-400 font-medium`, children: `搜索平台:` }),
+                      (0, $.jsx)(`span`, { className: `font-bold text-slate-900 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs`, children: platTitle }),
                     ],
                   }),
+                  (0, $.jsx)(`span`, { className: `text-slate-300`, children: `|` }),
                   (0, $.jsxs)(`div`, {
-                    className: `text-[10px] text-slate-400 mt-0.5`,
-                    children: [`平台: `, platTitle],
-                  }),
-                ],
-              }),
-              (0, $.jsxs)(`div`, {
-                className: `bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col justify-between`,
-                children: [
-                  (0, $.jsx)(`div`, {
-                    className: `text-[11px] text-slate-500 font-medium`,
-                    children: `搜索请求入口`,
-                  }),
-                  (0, $.jsx)(`div`, {
-                    className: `text-xs font-mono font-bold text-slate-800 truncate mt-1`,
-                    title: `https://www.${domainStr}/search?keyword=${kwTarget || `南京`}`,
-                    children: `GET /search?q=${kwTarget || `南京`}`,
-                  }),
-                  (0, $.jsx)(`div`, {
-                    className: `text-[10px] text-emerald-600 font-semibold mt-0.5`,
-                    children: `综合排序 + 最新发布优先`,
-                  }),
-                ],
-              }),
-              (0, $.jsxs)(`div`, {
-                className: `bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col justify-between`,
-                children: [
-                  (0, $.jsx)(`div`, {
-                    className: `text-[11px] text-slate-500 font-medium`,
-                    children: `搜索命中与有效入库`,
-                  }),
-                  (0, $.jsxs)(`div`, {
-                    className: `text-sm font-mono font-black text-emerald-700 mt-1 flex items-center gap-1`,
+                    className: `flex items-center gap-1.5`,
                     children: [
-                      totalInb.toLocaleString(),
-                      ` / `,
-                      totalHit.toLocaleString(),
-                      ` 条`,
+                      (0, $.jsx)(`span`, { className: `text-[11px] text-slate-400 font-medium`, children: `搜索平台入口URL:` }),
+                      (0, $.jsx)(`a`, {
+                        href: `https://www.${domainStr}`,
+                        target: `_blank`,
+                        rel: `noreferrer`,
+                        className: `font-mono text-[11.5px] font-semibold text-[#0066FF] hover:underline bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md transition-colors`,
+                        title: `点击访问搜索平台官网入口`,
+                        children: `https://www.${domainStr}`,
+                      }),
                     ],
                   }),
+                  (0, $.jsx)(`span`, { className: `text-slate-300`, children: `|` }),
                   (0, $.jsxs)(`div`, {
-                    className: `text-[10px] text-slate-400 mt-0.5`,
-                    children: [`去重过滤 `, totalDup.toLocaleString(), ` 条`],
+                    className: `flex items-center gap-1.5`,
+                    children: [
+                      (0, $.jsx)(`span`, { className: `text-[11px] text-slate-400 font-medium`, children: `检索请求入口规范:` }),
+                      (0, $.jsx)(`span`, {
+                        className: `font-mono text-[11px] text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200`,
+                        children: `https://www.${domainStr}/search/{keyword}?sort_type=latest`,
+                      }),
+                    ],
                   }),
                 ],
               }),
               (0, $.jsxs)(`div`, {
-                className: `bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col justify-between`,
+                className: `flex items-center gap-2 text-[11px] text-slate-500`,
                 children: [
-                  (0, $.jsx)(`div`, {
-                    className: `text-[11px] text-slate-500 font-medium`,
-                    children: `请求响应耗时 / 代理健康`,
-                  }),
-                  (0, $.jsx)(`div`, {
-                    className: `text-sm font-mono font-black text-blue-700 mt-1`,
-                    children: `均值 248ms (200 OK)`,
-                  }),
-                  (0, $.jsx)(`div`, {
-                    className: `text-[10px] text-slate-400 mt-0.5 truncate`,
-                    children: `华东-上海高匿住宅代理池`,
-                  }),
+                  (0, $.jsx)(`span`, { className: `px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold`, children: `公共信息 · 本平台所有关键词一致` }),
                 ],
               }),
             ],
@@ -57078,10 +57046,6 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                             children: `命中/入库/去重`,
                           }),
                           (0, $.jsx)(`th`, {
-                            className: `py-2.5 px-3 min-w-[240px] whitespace-nowrap`,
-                            children: `搜索平台入口URL`,
-                          }),
-                          (0, $.jsx)(`th`, {
                             className: `py-2.5 px-3 w-28 whitespace-nowrap text-center`,
                             children: `调度状态`,
                           }),
@@ -57093,7 +57057,7 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                       children: filtered.length === 0
                         ? (0, $.jsx)(`tr`, {
                             children: (0, $.jsx)(`td`, {
-                              colSpan: isServiceLog ? 6 : 5,
+                              colSpan: isServiceLog ? 5 : 4,
                               className: `py-12 text-center text-slate-400`,
                               children: `未匹配到符合条件的关键词轮询日志`,
                             }),
@@ -57192,26 +57156,6 @@ weixin, wx_token_08, token=891274; slave_sid=b018..., 政务流水`,
                                         className: `text-slate-400 font-medium`,
                                         title: `去重过滤数量`,
                                         children: [`去重 `, item.duplicateCount],
-                                      }),
-                                    ],
-                                  }),
-                                }),
-                                (0, $.jsx)(`td`, {
-                                  className: `py-3 px-3 whitespace-nowrap`,
-                                  children: (0, $.jsxs)(`div`, {
-                                    className: `flex items-center gap-1.5`,
-                                    children: [
-                                      (0, $.jsx)(`span`, {
-                                        className: `px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shrink-0`,
-                                        children: item.platformName || platTitle,
-                                      }),
-                                      (0, $.jsx)(`a`, {
-                                        href: item.searchUrl,
-                                        target: `_blank`,
-                                        rel: `noreferrer`,
-                                        className: `font-mono text-[11px] text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[260px] inline-block transition-colors`,
-                                        title: item.searchUrl,
-                                        children: item.searchUrl,
                                       }),
                                     ],
                                   }),
